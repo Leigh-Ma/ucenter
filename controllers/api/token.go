@@ -18,13 +18,9 @@ func (c *TokenController) Verify() {
 		return
 	}
 
-	if err := models.TokenM.VerifyToken(f.UserId, f.Token); err != nil {
-		resp.Error(err.Error())
-		c.renderJson(resp)
-		return
-	}
+	status := models.TokenM.VerifyToken(f.UserId, f.Token)
 
-	resp.Success()
+	resp.Set(status, &http.D{"Token": f.Token})
 	c.renderJson(resp)
 
 	return

@@ -3,8 +3,8 @@ package models
 import (
 	"time"
 	"sync"
-	"errors"
 	"ucenter/library/types"
+	"ucenter/library/http"
 )
 
 const (
@@ -32,7 +32,7 @@ func (t *AuthTokenManager) GetUserToken(userId int64) *AuthToken{
 	t.RUnlock()
 
 	if !ok {
-		auth := &AuthToken{UserId: userId}
+		auth = &AuthToken{UserId: userId}
 		err := auth.FindBy("UserId", userId, auth)
 		if err != nil {
 			auth.Insert(auth)
@@ -51,7 +51,7 @@ func (t *AuthTokenManager) AddToken(token *AuthToken) {
 	t.Unlock()
 }
 
-func (t *AuthTokenManager) VerifyToken(userId int64, token string) error {
+func (t *AuthTokenManager) VerifyToken(userId int64, token string) uint {
 	t.Lock()
 	auth := t.UserTokens[userId]
 	if auth == nil {
@@ -75,23 +75,21 @@ func (t *AuthToken) TableName() string {
 }
 
 
-func (t *AuthToken) verifyToken(token string, userId ...int64) error {
-	var err error = nil
+func (t *AuthToken) verifyToken(token string, userId ...int64) uint {
+	var err uint = http.OK
 
 	if len(userId) > 0 {
-		err = t.FindBy("UserId", userId, t)
-	}
-
-	if err != nil {
-		return errors.New("Token User invalid")
+		if e := t.FindBy("UserId", userId[0], t); e != nil {
+			return http.ERR_USER_ID_INVALID
+		}
 	}
 
 	if token != t.Token {
-		err = errors.New("Token mismatch")
+		err = http.ERR_TOKEN_INVALID
 	}
 
 	if t.ExpireAt > time.Now().Unix() {
-		err = errors.New("Token expired")
+		err = http.ERR_TOKEN_EXPIRED
 	}
 
 	return err

@@ -7,6 +7,25 @@ import (
 	"ucenter/library/tools"
 )
 
+type FModifyPassword struct {
+	Email string
+	Password string
+	PasswordNew string
+}
+
+type FRegister struct {
+	Name string
+	Email string
+	Password string
+	PasswordRe string
+	Uuid string
+}
+
+type FPhoneRegister struct {
+	PhoneID string
+	VerifyCode string
+}
+
 type FTokenVerify struct {
 	Token  string
 	UserId int64
@@ -18,13 +37,13 @@ type FTokenLogin struct {
 }
 
 type FPasswordLogin struct {
-	UUID string
+	Uuid string
 	Email string
 	Password  string
 }
 
 type FVisitorLogin struct {
-	UUID string
+	Uuid string
 	AppKey string
 }
 

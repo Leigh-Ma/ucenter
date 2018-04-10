@@ -69,7 +69,7 @@ func (c *apiController) renderJson(resp *http.JResp) {
 
 func (c *apiController) checkInputs(f interface{}, resp *http.JResp) bool {
 	if err := c.parseJsonInput(f); err != nil {
-		resp.ParamError(err.Error())
+		resp.Error(http.ERR_PARAMS_ERROR, err.Error())
 		c.renderJson(resp)
 		return false
 	}

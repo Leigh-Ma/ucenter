@@ -17,7 +17,7 @@ func (c *LoginController) VisitorLogin() {
 		return
 	}
 
-	user, _ := models.UserM.GetVisitor(f.UUID)
+	user, _ := models.UserM.GetVisitor(f.Uuid)
 
 	auth := models.TokenM.GetUserToken(user.Id)
 
@@ -35,13 +35,12 @@ func (c *LoginController) TokenLogin() {
 		return
 	}
 
-	if err := models.TokenM.VerifyToken(f.UserId, f.Token); err != nil {
-		resp.Error(err.Error())
-		c.renderJson(resp)
-		return
-	}
+	status := models.TokenM.VerifyToken(f.UserId, f.Token)
 
-	resp.Success(&http.D{"Token": f.Token, "UserId": f.UserId})
+	resp.Set(status, &http.D{
+		"Token": f.Token,
+		"UserId": f.UserId,
+	})
 
 	c.renderJson(resp)
 }
@@ -53,15 +52,15 @@ func (c *LoginController) Login() {
 		return
 	}
 
-	user, isNew := models.UserM.GetByEmail(f.Email, f.UUID)
+	user, isNew := models.UserM.GetByEmail(f.Email, f.Uuid)
 	if isNew {
-		resp.PasswordError("User not found")
+		resp.Error(http.ERR_EMAIL_NOT_REGISTERED)
 		c.renderJson(resp)
 		return
 	}
 
 	if !user.VerifyPassword(f.Password) {
-		resp.PasswordError()
+		resp.Error(http.ERR_PASSWORD_ERROR)
 		c.renderJson(resp)
 		return
 	}

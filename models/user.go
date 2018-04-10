@@ -12,7 +12,7 @@ type User struct {
 	Email    string `orm:"unique;size(64)"`
 	Password string
 	Salt     string
-	UUID     string
+	Uuid     string
 	IsActive bool
 	IsForbid bool
 	RawPwd   string
@@ -46,14 +46,14 @@ var (
 type UserManager struct {
 	sync.RWMutex
 	UsersById   map[int64]*User
-	UsersByUUID map[string]*User
+	UsersByUuid map[string]*User
 	UsersByEmail map[string]*User
 }
 
 func NewUserManager() *UserManager{
 	return &UserManager{
 		UsersById: make(map[int64]*User, 0),
-		UsersByUUID: make(map[string]*User, 0),
+		UsersByUuid: make(map[string]*User, 0),
 		UsersByEmail: make(map[string]*User, 0),
 	}
 }
@@ -61,7 +61,7 @@ func NewUserManager() *UserManager{
 func (t *UserManager) AddUser(user *User) {
 	t.Lock()
 	t.UsersById[user.Id] = user
-	t.UsersByUUID[user.UUID] = user
+	t.UsersByUuid[user.Uuid] = user
 	if user.Email != "" {
 		t.UsersByEmail[user.Email] = user
 	}
@@ -70,16 +70,20 @@ func (t *UserManager) AddUser(user *User) {
 
 func (t *UserManager) GetVisitor(uuid string)(*User, bool) {
 	t.RLock()
-	user, ok := t.UsersByUUID[uuid]
-	t.Unlock()
+	user, ok := t.UsersByUuid[uuid]
+	t.RUnlock()
+
 	isNew := false
 	if !ok {
-		user := &User{
-			UUID:     uuid,
+		user = &User{
+			Uuid:     uuid,
 			IsActive: true,
 		}
-		if err := user.FindBy("UUID", uuid, user); err != nil {
+
+		if err := user.FindBy("Uuid", uuid, user); err != nil {
+			//todo error
 			user.Insert(user)
+
 			isNew = true
 		}
 
@@ -89,11 +93,12 @@ func (t *UserManager) GetVisitor(uuid string)(*User, bool) {
 	return user, isNew
 }
 
+//todo user name
 func (t *UserManager) GetByEmail(email string, uuid... string)(u *User, isNew bool) {
 
 	t.RLock()
 	user, ok := t.UsersByEmail[email]
-	t.Unlock()
+	t.RUnlock()
 
 	if !ok {
 		user := &User{
@@ -102,7 +107,7 @@ func (t *UserManager) GetByEmail(email string, uuid... string)(u *User, isNew bo
 		}
 
 		if len(uuid) > 0 && len(uuid[0]) > 0 {
-			user.UUID = uuid[0]
+			user.Uuid = uuid[0]
 		}
 
 		if err := user.FindBy("Email", email, user); err != nil {

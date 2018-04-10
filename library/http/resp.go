@@ -25,25 +25,18 @@ func (r *JResp) Success(d... *D) {
 	}
 }
 
-func (r *JResp) ParamError(reason... string) {
-	r.ErrorCode = ERR_PARAM_ERR
-	if len(reason) > 0 {
-		r.ErrorReason = reason[0]
-	}
-}
-
-func (r *JResp) Error(reason... string) {
-	r.ErrorCode = ERR_NORMAL_ERR
-	if len(reason) > 0 {
-		r.ErrorReason = reason[0]
-	}
-}
-
-func (r *JResp) PasswordError(reason... string) {
-	r.ErrorCode = ERR_PASSWORD_ERR
+func (r *JResp) Error(code uint, reason... string) {
+	r.ErrorCode = code
 	if len(reason) > 0 {
 		r.ErrorReason = reason[0]
 	} else {
-		r.ErrorReason = "Password Error"
+		r.ErrorReason = ErrDesc[code]
+	}
+}
+
+func (r *JResp) Set(code uint, d... *D) {
+	r.Error(code)
+	if len(d) > 0 {
+		r.Data = d[0]
 	}
 }
