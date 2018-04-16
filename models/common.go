@@ -1,8 +1,8 @@
 package models
 
 import (
-	"time"
 	"github.com/astaxie/beego/orm"
+	"time"
 )
 
 type ITable interface {
@@ -15,7 +15,7 @@ type TCom struct {
 	Id        int64     `orm:"auto"`
 	CreatedAt time.Time `orm:"auto_now_add;type(datetime)"`
 	UpdatedAt time.Time `orm:"auto_now;type(datetime)"`
-	dbh *dbh                `orm:"-"`
+	dbh       *dbh      `orm:"-"`
 }
 
 func (t *TCom) SetId(id int64) {
@@ -65,20 +65,19 @@ func (t *TCom) NewQuery(obj interface{}) orm.QuerySeter {
 	return t.dbh.NewQuery(obj)
 }
 
-func (t *TCom) Insert(obj interface{})(int64, error) {
+func (t *TCom) Insert(obj interface{}) (int64, error) {
 	if t.dbh == nil {
 		t.dbh = DBH()
 	}
 	return t.dbh.Insert(obj)
 }
 
-func (t *TCom) Update(obj interface{}, cols... string)(int64, error) {
+func (t *TCom) Update(obj interface{}, cols ...string) (int64, error) {
 	if t.dbh == nil {
 		t.dbh = DBH()
 	}
 	return t.dbh.Update(obj, cols...)
 }
-
 
 type dbh struct {
 	orm.Ormer
@@ -123,5 +122,3 @@ func (h *dbh) MultiQuery(cond *orm.Condition, table interface{}, cols ...string)
 func (h *dbh) NewQuery(obj interface{}) orm.QuerySeter {
 	return h.QueryTable(obj)
 }
-
-

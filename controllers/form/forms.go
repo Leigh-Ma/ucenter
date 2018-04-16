@@ -1,28 +1,28 @@
 package form
 
 import (
-	"reflect"
 	"fmt"
 	"net/url"
+	"reflect"
 	"ucenter/library/tools"
 )
 
 type FModifyPassword struct {
-	Email string
-	Password string
+	Email       string
+	Password    string
 	PasswordNew string
 }
 
 type FRegister struct {
-	Name string
-	Email string
-	Password string
+	Name       string
+	Email      string
+	Password   string
 	PasswordRe string
-	Uuid string
+	Uuid       string
 }
 
 type FPhoneRegister struct {
-	PhoneID string
+	PhoneID    string
 	VerifyCode string
 }
 
@@ -37,13 +37,13 @@ type FTokenLogin struct {
 }
 
 type FPasswordLogin struct {
-	Uuid string
-	Email string
-	Password  string
+	Uuid     string
+	Email    string
+	Password string
 }
 
 type FVisitorLogin struct {
-	Uuid string
+	Uuid   string
 	AppKey string
 }
 

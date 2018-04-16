@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-    api.ApiRouter.RegisterRouter()
+	api.ApiRouter.RegisterRouter()
 }

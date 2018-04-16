@@ -8,7 +8,6 @@ var (
 			&AuthToken{}, &User{}, &Player{},
 		},
 	}
-
 )
 
 func init() {

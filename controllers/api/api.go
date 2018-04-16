@@ -1,17 +1,16 @@
 package api
 
 import (
-	"github.com/astaxie/beego"
 	"encoding/json"
-	"github.com/astaxie/beego/validation"
 	"errors"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/validation"
+	"strings"
+	. "ucenter/controllers"
+	. "ucenter/controllers/form"
 	"ucenter/library/http"
 	"ucenter/library/tools"
-	. "ucenter/controllers"
-	"strings"
-	. "ucenter/controllers/form"
 )
-
 
 var export func(ctrl beego.ControllerInterface, r map[string]string) func(string) = Exportor
 
@@ -19,11 +18,10 @@ var ApiRouter = &RouterGroup{
 	Namespace: "/api/",
 
 	Routers: map[string]IExport{
-		"login":         &LoginController{},
-		"token":         &TokenController{},
+		"login": &LoginController{},
+		"token": &TokenController{},
 	},
 }
-
 
 type apiController struct {
 	beego.Controller

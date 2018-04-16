@@ -5,7 +5,6 @@ import (
 	"strings"
 )
 
-
 type IExport interface {
 	Export() func(string)
 }

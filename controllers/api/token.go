@@ -28,6 +28,6 @@ func (c *TokenController) Verify() {
 
 func (c *TokenController) Export() func(string) {
 	return export(c, map[string]string{
-		"GET:  /verify":     "Verify",
+		"GET:  /verify": "Verify",
 	})
 }

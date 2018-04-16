@@ -5,9 +5,9 @@ import "ucenter/models/helper"
 // Player information for all logic
 type Player struct {
 	TCom
-	UserId int64
-	Name string
-	PvpLvl int
+	UserId   int64
+	Name     string
+	PvpLvl   int
 	GoldCoin int
 	helper.Recovery
 }

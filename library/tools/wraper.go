@@ -11,7 +11,6 @@ type iString interface {
 	String() string
 }
 
-
 // convert string to specify type
 
 type StrTo string

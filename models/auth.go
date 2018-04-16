@@ -1,10 +1,10 @@
 package models
 
 import (
-	"time"
 	"sync"
-	"ucenter/library/types"
+	"time"
 	"ucenter/library/http"
+	"ucenter/library/types"
 )
 
 const (
@@ -20,13 +20,13 @@ type AuthTokenManager struct {
 	UserTokens map[int64]*AuthToken
 }
 
-func NewAuthTokenManager() *AuthTokenManager{
+func NewAuthTokenManager() *AuthTokenManager {
 	return &AuthTokenManager{
 		UserTokens: make(map[int64]*AuthToken, 0),
 	}
 }
 
-func (t *AuthTokenManager) GetUserToken(userId int64) *AuthToken{
+func (t *AuthTokenManager) GetUserToken(userId int64) *AuthToken {
 	t.RLock()
 	auth, ok := t.UserTokens[userId]
 	t.RUnlock()
@@ -73,7 +73,6 @@ type AuthToken struct {
 func (t *AuthToken) TableName() string {
 	return "auth_tokens"
 }
-
 
 func (t *AuthToken) verifyToken(token string, userId ...int64) uint {
 	var err uint = http.OK

@@ -1,18 +1,17 @@
 package main
 
 import (
-	_ "ucenter/routers"
 	"github.com/astaxie/beego"
-	_ "github.com/astaxie/beego/session/mysql"
 	"github.com/astaxie/beego/orm"
+	_ "github.com/astaxie/beego/session/mysql"
 	"os"
+	_ "ucenter/routers"
 )
 
 func main() {
 	initOrm()
 	beego.Run()
 }
-
 
 func initOrm() {
 	orm.RegisterDriver("mysql", orm.DRMySQL)
@@ -24,4 +23,3 @@ func initOrm() {
 
 	orm.RunSyncdb("default", false, false)
 }
-

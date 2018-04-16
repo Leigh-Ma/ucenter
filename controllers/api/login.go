@@ -38,7 +38,7 @@ func (c *LoginController) TokenLogin() {
 	status := models.TokenM.VerifyToken(f.UserId, f.Token)
 
 	resp.Set(status, &http.D{
-		"Token": f.Token,
+		"Token":  f.Token,
 		"UserId": f.UserId,
 	})
 
@@ -76,8 +76,8 @@ func (c *LoginController) Login() {
 
 func (c *LoginController) Export() func(string) {
 	return export(c, map[string]string{
-		"GET:  /visitor":     "VisitorLogin",
-		"GET:  /tokenLogin":  "TokenLogin",
-		"GET:  /":            "Login",
+		"GET:  /visitor":    "VisitorLogin",
+		"GET:  /tokenLogin": "TokenLogin",
+		"GET:  /":           "Login",
 	})
 }

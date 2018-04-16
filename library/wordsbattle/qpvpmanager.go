@@ -6,19 +6,18 @@ import (
 
 var (
 	qPvpWaiting = newQPvpManager()
-	qPvpON = newQPvpManager()
+	qPvpON      = newQPvpManager()
 )
 
-func GetOnGoingQPvpByGuid(guid string) *QPvp{
+func GetOnGoingQPvpByGuid(guid string) *QPvp {
 	return qPvpON.getQPvp(guid)
 }
 
-func GetAWaitingQPvp(level int32) *QPvp{
+func GetAWaitingQPvp(level int32) *QPvp {
 	return qPvpWaiting.matchOneQPvpByLevel(level)
 }
 
-
-func finishOngoingQPvp(pvp *QPvp) *QPvp{
+func finishOngoingQPvp(pvp *QPvp) *QPvp {
 	return qPvpON.delQPvp(pvp)
 }
 
@@ -40,7 +39,7 @@ func (t *qPvpManager) getQPvp(guid string) *QPvp {
 	return p
 }
 
-func (t *qPvpManager) addQPvp(pvp *QPvp)  {
+func (t *qPvpManager) addQPvp(pvp *QPvp) {
 	t.Lock()
 	t.PS[pvp.Guid] = pvp
 	t.Unlock()
@@ -53,12 +52,12 @@ func (t *qPvpManager) delQPvp(pvp *QPvp) *QPvp {
 	return pvp
 }
 
-func (t *qPvpManager) matchOneQPvpByLevel(level int32)(m *QPvp) {
-	diff := 1<<31
+func (t *qPvpManager) matchOneQPvpByLevel(level int32) (m *QPvp) {
+	diff := 1 << 31
 
 	t.Lock()
 	for _, pvp := range t.PS {
-		if d := pvp.levelDiff(level); d < diff {
+		if d := pvp.lvlDiff(level); d < diff {
 			m = pvp
 			diff = d
 			if diff == 0 {

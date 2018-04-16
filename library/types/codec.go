@@ -1,15 +1,15 @@
 package types
 
-import(
-	"math/rand"
+import (
 	"crypto/md5"
-	"fmt"
 	"encoding/hex"
+	"fmt"
+	"math/rand"
 )
 
 var (
 	alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	alen = len(alphanum)
+	alen     = len(alphanum)
 )
 
 func RandomString(n int) string {
@@ -21,7 +21,7 @@ func RandomString(n int) string {
 	return string(bytes)
 }
 
-func MD5(val string) string{
+func MD5(val string) string {
 	h := md5.New()
 	h.Write([]byte(val))
 	return fmt.Sprintf("%s", hex.EncodeToString(h.Sum(nil)))

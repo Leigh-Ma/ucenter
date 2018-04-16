@@ -1,9 +1,8 @@
 package models
 
-
 import (
-	"ucenter/library/types"
 	"sync"
+	"ucenter/library/types"
 )
 
 type User struct {
@@ -35,8 +34,8 @@ func (t *User) SetPassword(pwd string) {
 	t.Password = t.md5Pwd(pwd)
 }
 
-func (t *User) VerifyPassword(pwd string) bool{
-	return types.MD5(pwd + t.Salt) == t.Password
+func (t *User) VerifyPassword(pwd string) bool {
+	return types.MD5(pwd+t.Salt) == t.Password
 }
 
 var (
@@ -45,15 +44,15 @@ var (
 
 type UserManager struct {
 	sync.RWMutex
-	UsersById   map[int64]*User
-	UsersByUuid map[string]*User
+	UsersById    map[int64]*User
+	UsersByUuid  map[string]*User
 	UsersByEmail map[string]*User
 }
 
-func NewUserManager() *UserManager{
+func NewUserManager() *UserManager {
 	return &UserManager{
-		UsersById: make(map[int64]*User, 0),
-		UsersByUuid: make(map[string]*User, 0),
+		UsersById:    make(map[int64]*User, 0),
+		UsersByUuid:  make(map[string]*User, 0),
 		UsersByEmail: make(map[string]*User, 0),
 	}
 }
@@ -68,7 +67,7 @@ func (t *UserManager) AddUser(user *User) {
 	t.Unlock()
 }
 
-func (t *UserManager) GetVisitor(uuid string)(*User, bool) {
+func (t *UserManager) GetVisitor(uuid string) (*User, bool) {
 	t.RLock()
 	user, ok := t.UsersByUuid[uuid]
 	t.RUnlock()
@@ -94,7 +93,7 @@ func (t *UserManager) GetVisitor(uuid string)(*User, bool) {
 }
 
 //todo user name
-func (t *UserManager) GetByEmail(email string, uuid... string)(u *User, isNew bool) {
+func (t *UserManager) GetByEmail(email string, uuid ...string) (u *User, isNew bool) {
 
 	t.RLock()
 	user, ok := t.UsersByEmail[email]
@@ -117,7 +116,6 @@ func (t *UserManager) GetByEmail(email string, uuid... string)(u *User, isNew bo
 
 		t.AddUser(user)
 	}
-
 
 	u = user
 	return
