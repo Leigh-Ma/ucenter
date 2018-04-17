@@ -41,22 +41,11 @@ func (t *QPvp) onCmdJoin(p interface{}) {
 
 
 func (t *QPvp) onCmdStart(p interface{}) {
-	t.cacheSomeQuestions()
 	t.broadCastMsg(t.genStartMsg())
 }
 
 func (t *QPvp) onCmdEscape(p interface{}) {
-	ep, ok := p.(*QPvpPlayer)
-	if !ok {
-		logs.Alert("pvp on cmd escape, payload not valid player")
-		return
-	}
-
-	ep.Escaped = true
-	ep.EscapedRound = t.curRound
-
-	msg := &QPvpMsg{Code: pvpNotifyPlayerEscape, TimeStamp: time.Now().Unix(), Side: ep.Side}
-	t.broadCastMsg(msg, ep.Side)
+	t.broadCastMsg(t.genEscapeMsg(p))
 
 	if t.isAllOffLine() {
 		t.errorEnd(nil)
@@ -64,7 +53,11 @@ func (t *QPvp) onCmdEscape(p interface{}) {
 }
 
 func (t *QPvp) onCmdNextRound(p interface{}) {
-	t.broadCastMsg(t.genNextRoundMsg())
+	if t.RoundNum <= t.curRound {
+		t.sendCmd(&qPvpCmd{Code: pvpCmdFinish})
+	} else {
+		t.broadCastMsg(t.genNextRoundMsg())
+	}
 }
 
 func (t *QPvp) onCmdFinish(p interface{}) {
@@ -75,6 +68,8 @@ func (t *QPvp) onCmdFinish(p interface{}) {
 
 func (t *QPvp) genStartMsg() *QPvpMsg {
 	t.curRound = 1
+	t.cacheSomeQuestions()
+
 	question, err := t.getNewQuestion()
 	if err != nil {
 		t.errorEnd(err)
@@ -130,6 +125,18 @@ func (t *QPvp) genNextRoundMsg() *QPvpMsg {
 	}
 }
 
+func (t *QPvp) genEscapeMsg(d interface{})*QPvpMsg{
+	ep, ok := d.(*QPvpPlayer)
+	if !ok {
+		logs.Alert("pvp on cmd escape, payload not valid player")
+		return
+	}
+
+	ep.Escaped = true
+	ep.EscapedRound = t.curRound
+
+	return &QPvpMsg{Code: pvpNotifyPlayerEscape, TimeStamp: time.Now().Unix(), Side: ep.Side}
+}
 
 func (t *QPvp) genFinishMsg() *QPvpMsg {
 	return &QPvpMsg{}

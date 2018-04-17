@@ -94,6 +94,9 @@ func (t *QPvpPlayer) workAsRobot() error {
 	go func(){
 		for {
 			msg := <-t.robotEcho
+			if msg.Code == pvpNotifyPvpEnd {
+				return
+			}
 			//todo how robot act?
 			cpy := &QPvpMsg{Code: msg.Code, TimeStamp: msg.TimeStamp, Side: t.Side, Data: msg.Data}
 			t.pvp.sendMsg(cpy)

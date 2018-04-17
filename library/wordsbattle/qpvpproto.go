@@ -21,6 +21,7 @@ const (
 	pvpNotifyRoundCheck  = 1003
 	pvpNotifyAnswerHint  = 1004
 	pvpNotifyPlayerEscape = 1005
+	pvpNotifyPvpEnd       = 1003
 )
 
 const (
