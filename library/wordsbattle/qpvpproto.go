@@ -8,6 +8,7 @@ const (
 	pvpCmdEscape    = 3
 	pvpCmdNextRound = 4
 	pvpCmdFinish    = 5
+	pvpCmdErrEnd    = 6
 
 	pvpNotifyError = 10
 
@@ -15,23 +16,50 @@ const (
 	pvpMsgAnswerHint  = 102
 	pvpMsgAnswerSkip  = 103
 
-	pvpNotifyPvpStart    = 1000
-	pvpNotifyRoundCreate = 1001
-	pvpNotifyAnswerCheck = 1002
-	pvpNotifyRoundCheck  = 1003
-	pvpNotifyAnswerHint  = 1004
-	pvpNotifyPlayerEscape = 1005
-	pvpNotifyPvpEnd       = 1003
+	pvpNotifyPvpStart     = 1000
+	pvpNotifyRoundCreate  = 1001
+	pvpNotifyAnswerCheck  = 1002
+	pvpNotifyRoundCheck   = 1003
+	pvpNotifyAnswerHint   = 1004
+	pvpNotifyPlayerJoin   = 1005
+	pvpNotifyPlayerEscape = 1006
+	pvpNotifyPvpEnd       = 1007
 )
 
+var codeName map[int]string = map[int]string{
+	pvpSideServer: "pvpSideServer",
+
+	pvpCmdJoin:      "pvpCmdJoin",
+	pvpCmdStart:     "pvpCmdStart",
+	pvpCmdEscape:    "pvpCmdEscape",
+	pvpCmdNextRound: "pvpCmdNextRound",
+	pvpCmdFinish:    "pvpCmdFinish",
+	pvpCmdErrEnd:    "pvpCmdErrEnd",
+
+	pvpNotifyError: "pvpNotifyError",
+
+	pvpMsgAnswerRound: "pvpMsgAnswerRound",
+	pvpMsgAnswerHint:  "pvpMsgAnswerHint",
+	pvpMsgAnswerSkip:  "pvpMsgAnswerSkip",
+
+	pvpNotifyPvpStart:     "pvpNotifyPvpStart",
+	pvpNotifyRoundCreate:  "pvpNotifyRoundCreate",
+	pvpNotifyAnswerCheck:  "pvpNotifyAnswerCheck",
+	pvpNotifyRoundCheck:   "pvpNotifyRoundCheck",
+	pvpNotifyAnswerHint:   "pvpNotifyAnswerHint",
+	pvpNotifyPlayerJoin:   "pvpNotifyPlayerJoin",
+	pvpNotifyPlayerEscape: "pvpNotifyPlayerEscape",
+	pvpNotifyPvpEnd:       "pvpNotifyPvpEnd",
+}
+
 const (
-	pvpCfgStartTimeOut    = 30
-	pvpCfgAnswerTimeout   = 60
+	pvpCfgStartTimeOut  = 10
+	pvpCfgAnswerTimeout = 30
 )
 
 //client msg data --> pvpMsgAnswerRound
 type qPvpQuestion struct {
-	RoundId     int    // server
+	RoundId     int    // server, set after answered
 	QuestionId  string // server
 	Question    string // server
 	QuestionAt  int64  // server
@@ -62,12 +90,16 @@ type qPvpPlayerBrief struct {
 }
 
 type qPvpNotifyNextRound struct {
-	Question     qPvpQuestion
-	LastQuestion qPvpQuestion
+	Question     *qPvpQuestion
+	LastQuestion *qPvpQuestion
 	LastAnswers  map[int]*qPvpAnswer //by side id
 }
 
 type qPvpNotifyStart struct {
-	Question qPvpQuestion
+	Question *qPvpQuestion
 	Players  []*qPvpPlayerBrief
+}
+
+type qPvpNotifyJoin struct {
+	Player *qPvpPlayerBrief
 }

@@ -7,6 +7,7 @@
 1-INTERNAL_ERROR-Internal error
 2-DATA_BASE_ERROR-Database operation error
 3-PARAMS_ERROR-Input parameters error
+4-WEB_SOCKET_NEEDED-Should enable web socket in http header
 
 ## User
 ### Login
@@ -28,5 +29,7 @@
 2011-EMAIL_HAS_BEEN_TAKEN-Email has been taken
 2012-EMAIL_INVALID-Email is not valid
 
+## Word Battle
+3001-WB_JOIN_BATTLE_FAILED-Join battle error
 
 

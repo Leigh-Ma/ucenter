@@ -7,11 +7,17 @@ type Player struct {
 	TCom
 	UserId   int64
 	Name     string
-	PvpLvl   int
+	Rank   int
+	SubRank int
+	Icon string
 	GoldCoin int
 	helper.Recovery
 }
 
 func (t *Player) TableName() string {
 	return "players"
+}
+
+func (t *Player) DoAnswerLog(questionId string, correct bool) {
+
 }

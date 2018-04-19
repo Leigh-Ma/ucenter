@@ -9,50 +9,53 @@ var (
 	qPvpON      = newQPvpManager()
 )
 
-func GetOnGoingQPvpByGuid(guid string) *QPvp {
-	return qPvpON.getQPvp(guid)
+func GetAWaitingQPvp(level int) *qPvp {
+	q := qPvpWaiting.matchOneQPvpByLevel(level)
+	if q == nil {
+		q = newQPvp(2, level, 5)
+		qPvpWaiting.addQPvp(q)
+	}
+	return q
 }
 
-func GetAWaitingQPvp(level int32) *QPvp {
-	return qPvpWaiting.matchOneQPvpByLevel(level)
-}
-
-func finishOngoingQPvp(pvp *QPvp) *QPvp {
-	return qPvpON.delQPvp(pvp)
+func GetAPracticeRoom(level int) *qPvp {
+	p := newQPvp(1, level, 0)
+	p.IsPvp = false
+	return p
 }
 
 type qPvpManager struct {
 	sync.RWMutex
-	PS map[string]*QPvp
+	PS map[string]*qPvp
 }
 
 func newQPvpManager() *qPvpManager {
 	return &qPvpManager{
-		PS: make(map[string]*QPvp, 0),
+		PS: make(map[string]*qPvp, 0),
 	}
 }
 
-func (t *qPvpManager) getQPvp(guid string) *QPvp {
+func (t *qPvpManager) getQPvp(guid string) *qPvp {
 	t.RLock()
 	p := t.PS[guid]
 	t.RUnlock()
 	return p
 }
 
-func (t *qPvpManager) addQPvp(pvp *QPvp) {
+func (t *qPvpManager) addQPvp(pvp *qPvp) {
 	t.Lock()
 	t.PS[pvp.Guid] = pvp
 	t.Unlock()
 }
 
-func (t *qPvpManager) delQPvp(pvp *QPvp) *QPvp {
+func (t *qPvpManager) delQPvp(pvp *qPvp) *qPvp {
 	t.Lock()
 	delete(t.PS, pvp.Guid)
 	t.Unlock()
 	return pvp
 }
 
-func (t *qPvpManager) matchOneQPvpByLevel(level int32) (m *QPvp) {
+func (t *qPvpManager) matchOneQPvpByLevel(level int) (m *qPvp) {
 	diff := 1 << 31
 
 	t.Lock()

@@ -20,6 +20,7 @@ var ApiRouter = &RouterGroup{
 	Routers: map[string]IExport{
 		"login": &LoginController{},
 		"token": &TokenController{},
+		"battle": &BattleController{},
 	},
 }
 

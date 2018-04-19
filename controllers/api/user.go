@@ -10,6 +10,7 @@ type UserController struct {
 	apiController
 }
 
+// POST:  /user/modify_pwd
 func (c *UserController) ModifyPassword() {
 	f, resp := &form.FModifyPassword{}, &http.JResp{}
 	if !c.checkInputs(f, resp) {
@@ -39,4 +40,10 @@ func (c *UserController) ModifyPassword() {
 	resp.Success(&http.D{"UserId": user.Id, "Email": user.Email})
 
 	c.renderJson(resp)
+}
+
+func (c *UserController) Export() func(string) {
+	return export(c, map[string]string{
+		"POST:  /modify_pwd": "ModifyPassword",
+	})
 }

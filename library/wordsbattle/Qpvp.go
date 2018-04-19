@@ -3,17 +3,20 @@ package wb
 import (
 	"time"
 	"ucenter/library/types"
+	"github.com/pkg/errors"
+	"github.com/astaxie/beego/logs"
 )
 
-type QPvp struct {
+type qPvp struct {
 	Guid           string
-	Level          int32
+	Level          int
 	Subject        string
 
 	CreateAt       int64
-	StartThreshold int32 //player num when player started
+	StartThreshold int //player num when player started
 	RoundNum       int
 	IsPvp          bool
+	ticker         int //heart beat times
 
 	allOffLine bool
 	curRound    int
@@ -26,11 +29,11 @@ type QPvp struct {
 	msg    chan *QPvpMsg
 
 
-	players map[int]*QPvpPlayer
+	players map[int]*qPvpPlayer
 }
 
-func NewQPvp(startThreshold, level int32, round int) *QPvp {
-	q := &QPvp{
+func newQPvp(startThreshold, level, round int) *qPvp {
+	q := &qPvp{
 		Guid:           types.NewGuid().String(),
 		Level:          level,
 		StartThreshold: startThreshold,
@@ -38,113 +41,49 @@ func NewQPvp(startThreshold, level int32, round int) *QPvp {
 		IsPvp:          true,
 		CreateAt:       time.Now().Unix(),
 		msg:            make(chan *QPvpMsg, 5),
-		cmd:            make(chan int),
-		players:        make(map[string]*QPvpPlayer, 2),
+		cmd:            make(chan *qPvpCmd, 1),
+		players:        make(map[int]*qPvpPlayer, 2),
 	}
 
-	q.startCtrl()
+	qPvpWaiting.addQPvp(q)
+
+	q.startCtrlRoutine()
 
 	return q
 }
 
-func (t *QPvp) Join(p *QPvpPlayer, vsRobot ...bool) error {
+func (t *qPvp) Join(p *qPvpPlayer, vsRobot ...bool) error {
 
 	t.sendCmd(&qPvpCmd{Code: pvpCmdJoin, Data: p})
 
+	//if vs a robot or just practice, join a robot as opponent
 	if len(vsRobot) > 0 && vsRobot[0] {
 		t.joinARobot(p.GoldCoin, p.Stamina)
 	}
 
+	p.pvp = t
+
 	if p.IsRobot {
-		p.workAsRobot()
+		//start a robot process routine
+		return p.workAsRobot()
 	} else {
-		p.workAsRealPlayer()
+		//work as real player, just a loop in current routine
+		return p.workAsPlayer()
 	}
 
-	return nil
 }
 
-func (t *QPvp) startCtrl() {
-	go func() {
-		ticker := time.Tick(10 * time.Second)
-		for {
-			select {
-			case msg := <-t.msg:
-				t.HandleMsg(msg)
-			case cmd := <-t.cmd:
-				t.HandleCmd(cmd)
-			case <-ticker:
-				t.CheckTimeout()
-			}
 
-			if t.status == 0 {
-				return
-			}
-		}
-	}()
-}
-
-func (t *QPvp) sendCmd(cmd *qPvpCmd) {
-	t.cmd <- cmd
-}
-
-func (t *QPvp) sendMsg(msg *QPvpMsg) {
-	t.msg <- msg
-}
-
-func (t *QPvp) finished() {
-	finishOngoingQPvp(t)
-}
-
-func (t *QPvp) lvlDiff(level int32) int32 {
-	diff := level - t.Level
-	if diff < 0 {
-		diff = -diff
-	}
-	return diff
-}
-
-func (t *QPvp) getPlayerBySide(side int) *QPvpPlayer {
-	p := t.players[side]
-	return p
-}
-
-func (t *QPvp) allPlayerBrief() []*qPvpPlayerBrief {
-	return nil
-}
-
-func (t *QPvp) getRoundAnswers(roundId int) map[int]*qPvpAnswer {
-	as := make(map[int]*qPvpAnswer)
-	for _, player := range t.players {
-		as[player.Side] = player.prepareRoundAnswer(roundId)
-	}
-	return as
-}
-
-func (t *QPvp) isAllOffLine() bool {
-	if !t.allOffLine {
-		for _, player := range t.players {
-			if !player.IsRobot && !player.Escaped {
-				return false
-			}
-		}
-	}
-
-	t.allOffLine = true
-
-	return t.allOffLine
-}
-
-func (t *QPvp) CheckTimeout() {
-
-
+func (t *qPvp) CheckTimeout() {
+	t.ticker += 1
+	logs.Debug("QPvp Tick[%3d], round(%2d/%2d), question: %v", t.ticker, t.curRound, t.RoundNum, t.curQuestion)
 	ts := time.Now().Unix()
+
 	t.chkStartTimeOut(ts)
 	t.chkRoundTimeOut(ts)
-
 }
 
-func (t *QPvp) chkStartTimeOut(now int64) bool {
+func (t *qPvp) chkStartTimeOut(now int64) bool {
 	if t.curRound >= 0 {
 		return false
 	}
@@ -154,14 +93,14 @@ func (t *QPvp) chkStartTimeOut(now int64) bool {
 		return false
 	}
 
-	var p *QPvpPlayer = nil
+	var p *qPvpPlayer = nil
 	for _, sp := range t.players {
 		p = sp
 		break
 	}
 
 	if p == nil {
-		t.errorEnd("No user in this pvp")
+		t.errorEnd(errors.New("No user in this pvp"))
 		return true
 	}
 
@@ -171,7 +110,7 @@ func (t *QPvp) chkStartTimeOut(now int64) bool {
 	return true
 }
 
-func (t *QPvp) chkRoundTimeOut(now int64) bool {
+func (t *qPvp) chkRoundTimeOut(now int64) bool {
 	if t.curRound <= 0 {
 		return false
 	}
@@ -182,18 +121,18 @@ func (t *QPvp) chkRoundTimeOut(now int64) bool {
 	}
 
 	for _, p := range t.players {
-		if p.LastMsgAt - t.curQuestion.QuestionAt <= pvpCfgAnswerTimeout {
+		if now - p.LastMsgAt <= pvpCfgAnswerTimeout {
 			continue
 		}
 		// todo user action time out
 		if !p.IsRobot && !p.Escaped {
-			p.workAsRobot()
+			t.sendCmd(&qPvpCmd{Code: pvpCmdEscape, Data:p})
 		}
 	}
 	return false
 }
 
-func (t *QPvp) joinARobot(gold, stamina int32) {
+func (t *qPvp) joinARobot(gold, stamina int32) {
 	robot := NewQPvpRobot(gold, stamina)
 	t.Join(robot)
 }

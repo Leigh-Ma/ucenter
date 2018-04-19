@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <title>Word Battle</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</head>
+
+
+<div class="container">
+    <h2>WebSocket WordBattle</h2>
+
+    <div class="container">
+        <input id="id_answer" type="text" value="" />
+        <input id="id_do_answer" type="button" value="Answer" onclick="sendAnswer()">
+        <p id="id_question"></p>
+        <ul id="id_history">
+
+        </ul>
+    </div>
+    <p id="id_status"></p>
+
+    <input id="id_start" type="button" class="btn btn-primary" value="Start" onclick="startPvp(this)"/>
+
+</div>
+
+
+<script>
+    var pvp = {
+        url: "ws://192.168.31.111:8080/api/battle/vsrobot",
+        round: 0,
+        question: {},
+        ws: {}
+    };
+    pvpMsgAnswerRound = 101;
+    pvpMsgAnswerHint  = 102;
+    pvpMsgAnswerSkip  = 103;
+
+    function startPvp() {
+        pvp.ws= new WebSocket(pvp.url);
+
+        pvp.ws.onopen = function(evt) {
+            onOpen(evt)
+        };
+        pvp.ws.onclose = function(evt) {
+            onClose(evt)
+        };
+        pvp.ws.onmessage = function(evt) {
+            onMessage(evt)
+        };
+        pvp.ws.onerror = function(evt) {
+            onError(evt)
+        };
+    }
+
+    function onOpen(evt) {
+        $("#id_start").attr({hidden:"hidden"})
+    }
+
+    function onClose(evt) {
+        $("#id_status").innerHTML = "Finished"
+    }
+
+    function onError(evt) {
+        $("#id_status").innerHTML = "Error"
+    }
+
+    function onMessage(evt) {
+        var m = JSON.parse(evt.data);
+
+        m.payload = JSON.parse(m.Data);
+        console.dir(m);
+        $("#id_history").append(`<li>${evt.data}</li>`)
+        switch(m.Cs) {
+            case "pvpNotifyPlayerJoin":
+                break;
+            case "pvpNotifyPvpStart":
+                pvp.question = new pvpQuestion(m.payload.Question);
+                $("#id_question").innerHTML = pvp.question.Show();
+                break;
+        }
+    }
+
+    function sendAnswer() {
+        var a = new pvpAnswer();
+        a.RoundId = 0;
+        a.Answer = $("#id_answer").val();
+
+        pvp.ws.send(JSON.stringify({
+            Code: pvpMsgAnswerRound,
+            Data: a.String()
+        }))
+    }
+
+
+</script>
+
+<script>
+    class pvpQuestion {
+        constructor(obj) {
+            obj = obj || {};
+            this.RoundId = obj.RoundId;
+            this.QuestionId = obj.QuestionId;
+            this.Question = obj.Question;
+            this.QuestionAt = obj.QuestionAt;
+        }
+
+        Show() {
+            return `RoundId: ${this.RoundId} Question: ${this.Question}`
+        }
+    }
+    class pvpAnswer {
+        constructor(obj) {
+            obj = obj || {};
+            this.RoundId = obj.RoundId;
+            this.Answer = obj.Answer;
+            this.Side = obj.Side;
+            this.IsCorrect = obj.IsCorrect;
+            this.AnswerAt = obj.AnswerAt;
+        }
+        String() {
+            return JSON.stringify(this)
+        }
+    }
+</script>
+
+</body>
+</html>

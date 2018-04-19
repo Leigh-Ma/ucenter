@@ -25,12 +25,12 @@ func (r *JResp) Success(d ...*D) {
 	}
 }
 
-func (r *JResp) Error(code uint, reason ...string) {
+func (r *JResp) Error(code uint, more ...string) {
 	r.ErrorCode = code
-	if len(reason) > 0 {
-		r.ErrorReason = reason[0]
-	} else {
-		r.ErrorReason = ErrDesc[code]
+	r.ErrorReason = ErrDesc[code]
+
+	if len(more) > 0 {
+		r.ErrorReason += ": " + more[0]
 	}
 }
 

@@ -2,27 +2,48 @@ package wb
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
+	"errors"
 	"fmt"
 	"time"
 )
 
-func (t *qPvpQuestion) checkAnswer(answer *qPvpAnswer, isRobot bool) {
+func (t *qPvpQuestion) checkAnswer(answer *qPvpAnswer, p *qPvpPlayer) {
 	//TODO ANSWER IS RIGHT?
 	answer.IsCorrect = true
-}
-
-func (t *QPvp) cacheSomeQuestions() {
-	if t.IsPvp {
-		t.questions = make([]*qPvpQuestion, t.RoundNum+1)
-		//TODO get several questions, numbered by t.RoundNum
-	} else {
-		//cache more questions when single practices
-		//TODO get more questions and append to t.question
+	if p.mp != nil && !p.IsRobot && !p.Escaped {
+		//TODO WRITE LOGS
+		p.mp.DoAnswerLog(t.QuestionId, answer.IsCorrect)
 	}
 }
 
-func (t *QPvp) getNewQuestion() (q *qPvpQuestion, err error) {
+func (t *qPvp) _cacheQuestion(lastRound, num int) {
+	for i:=1; i < num; i++ {
+		t.questions[lastRound+i] = &qPvpQuestion{
+			RoundId: 0,
+			QuestionId: fmt.Sprintf("question_%d", i),
+			Question: "question test",
+			Hint:     "answer hint",
+		}
+	}
+}
+
+func (t *qPvp) cacheSomeQuestions() {
+	if t.questions == nil {
+		t.questions = make(map[int]*qPvpQuestion, t.RoundNum)
+	}
+
+	//TODO get several questions, numbered by t.RoundNum
+	if t.IsPvp {
+		t._cacheQuestion(0, t.RoundNum)
+		t.questions = make(map[int]*qPvpQuestion, t.RoundNum)
+	} else {
+		more := 5
+		t._cacheQuestion(t.RoundNum, more)
+		t.RoundNum += more
+	}
+}
+
+func (t *qPvp) getNewQuestion() (q *qPvpQuestion, err error) {
 	if t.RoundNum >= t.curRound {
 		q = t.questions[t.curRound]
 	} else if !t.IsPvp {
@@ -31,7 +52,7 @@ func (t *QPvp) getNewQuestion() (q *qPvpQuestion, err error) {
 	}
 
 	if q == nil || q.RoundId != 0 {
-		err = errors.New(fmt.Sprintf("get question failed, round %s", t.curRound))
+		err = errors.New(fmt.Sprintf("get question failed, round %d question(%v)", t.curRound, q))
 	} else {
 		q.RoundId = t.curRound
 		q.QuestionAt = time.Now().Unix()
@@ -40,17 +61,17 @@ func (t *QPvp) getNewQuestion() (q *qPvpQuestion, err error) {
 	return
 }
 
-func (t *QPvp) handlePlayerAnswer(player *QPvpPlayer, msg *QPvpMsg) *qPvpAnswer {
+func (t *qPvp) handlePlayerAnswer(player *qPvpPlayer, msg *QPvpMsg) *qPvpAnswer {
 	answer := player.prepareRoundAnswer(t.curRound)
 
-	err := json.Unmarshal(msg.Data, answer)
+	err := json.Unmarshal([]byte(msg.Data), answer)
 	if err != nil {
 		answer.IsCorrect = false
 		player.notifyPlayerError(err)
 		return answer
 	}
 
-	t.curQuestion.checkAnswer(answer, player.IsRobot)
+	t.curQuestion.checkAnswer(answer, player)
 
 	err = player.prepareMsg(msg, pvpNotifyAnswerCheck, answer)
 
@@ -64,11 +85,11 @@ func (t *QPvp) handlePlayerAnswer(player *QPvpPlayer, msg *QPvpMsg) *qPvpAnswer 
 	return answer
 }
 
-func (t *QPvp) handlePlayerRequestHint(player *QPvpPlayer, msg *QPvpMsg) *qPvpHint {
+func (t *qPvp) handlePlayerRequestHint(player *qPvpPlayer, msg *QPvpMsg) *qPvpHint {
 	hint := &qPvpHint{}
 	if player.HintUsed >= player.HintMax {
 		player.notifyPlayerError(errors.New("Max Hint Time Used"))
-		return
+		return nil
 	}
 
 	err := json.Unmarshal([]byte(msg.Data), hint)
@@ -97,14 +118,14 @@ func (t *QPvp) handlePlayerRequestHint(player *QPvpPlayer, msg *QPvpMsg) *qPvpHi
 	return hint
 }
 
-func (t *QPvp) handlePlayerSkipRound(player *QPvpPlayer, msg *QPvpMsg) *qPvpHint {
+func (t *qPvp) handlePlayerSkipRound(player *qPvpPlayer, msg *QPvpMsg) *qPvpHint {
 	skip := &qPvpHint{}
 
 	player.prepareRoundAnswer(t.curRound)
 
 	if player.SkipUsed >= player.SkipMax {
 		player.notifyPlayerError(errors.New("Max Hint Time Used"))
-		return
+		return skip
 	}
 
 	err := json.Unmarshal([]byte(msg.Data), skip)
