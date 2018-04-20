@@ -1,8 +1,6 @@
 package wb
 
-import (
-	"github.com/astaxie/beego/logs"
-)
+import ()
 
 type QPvpMsg struct {
 	Code      int32
@@ -17,10 +15,10 @@ func (t *QPvpMsg) codeName() string {
 }
 
 func (t *qPvp) HandleMsg(msg *QPvpMsg) {
-	logs.Info("QPvp begin to handle msg: %s, %+v", msg.codeName(), msg)
+	t.Info("Handle msg: %s, %+v", msg.codeName(), msg)
 	player := t.getPlayerBySide(msg.Side)
 	if player == nil {
-		logs.Error("QPvp player not found for side", msg.Side)
+		t.Error("Player not found for side %d", msg.Side)
 		return
 	}
 
@@ -31,6 +29,8 @@ func (t *qPvp) HandleMsg(msg *QPvpMsg) {
 		t.onMsgAnswerHint(player, msg)
 	case pvpMsgAnswerSkip:
 		t.onMsgAnswerSkip(player, msg)
+	default:
+		t.Error("%s should not be proccessed", msg.codeName())
 	}
 }
 
@@ -67,5 +67,3 @@ func (t *qPvp) onMsgAnswerSkip(player *qPvpPlayer, msg *QPvpMsg) {
 		t.sendCmd(&qPvpCmd{Code: pvpCmdNextRound})
 	}
 }
-
-

@@ -20,7 +20,8 @@
     </div>
     <p id="id_status"></p>
 
-    <input id="id_start" type="button" class="btn btn-primary" value="Start" onclick="startPvp(this)"/>
+    <input id="id_pve" type="button" class="btn btn-primary" value="Pve" onclick="startPvp(this)"/>
+    <input id="id_practice" type="button" class="btn btn-primary" value="Practice" onclick="startPvp(this)"/>
 
 </div>
 
@@ -36,7 +37,16 @@
     pvpMsgAnswerHint  = 102;
     pvpMsgAnswerSkip  = 103;
 
-    function startPvp() {
+    function startPvp(ele) {
+        var act = $(ele).val();
+        if(act == "Practice"){
+            pvp.url =  "ws://192.168.31.111:8080/api/battle/practice"
+        }
+
+        _start()
+    }
+
+    function _start() {
         pvp.ws= new WebSocket(pvp.url);
 
         pvp.ws.onopen = function(evt) {
@@ -54,7 +64,8 @@
     }
 
     function onOpen(evt) {
-        $("#id_start").attr({hidden:"hidden"})
+        $("#id_pve").attr({hidden:"hidden"});
+        $("#id_practice").attr({hidden:"hidden"});
     }
 
     function onClose(evt) {
@@ -67,9 +78,9 @@
 
     function onMessage(evt) {
         var m = JSON.parse(evt.data);
-
+        console.log(evt.data);
         m.payload = JSON.parse(m.Data);
-        console.dir(m);
+
         $("#id_history").append(`<li>${evt.data}</li>`)
         switch(m.Cs) {
             case "pvpNotifyPlayerJoin":

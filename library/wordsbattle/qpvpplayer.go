@@ -3,10 +3,10 @@ package wb
 import (
 	"encoding/json"
 	"errors"
-	"time"
-	"ucenter/models"
 	"github.com/astaxie/beego/logs"
 	"github.com/gorilla/websocket"
+	"time"
+	"ucenter/models"
 )
 
 /*basic web socket interfaces*/
@@ -22,10 +22,10 @@ type qPvpPlayer struct {
 	GoldCoin int32
 	Stamina  int32
 
-	IsRobot   bool
-	Escaped   bool
+	IsRobot      bool
+	Escaped      bool
 	EscapedRound int
-	LastMsgAt int64
+	LastMsgAt    int64
 
 	HintMax  int
 	HintUsed int
@@ -49,13 +49,16 @@ func NewQPvpPlayer(player *models.Player, coin, stamina int32, ws qPvpWs) *qPvpP
 	}
 }
 
-func NewQPvpRobot(coin, stamina int32) *qPvpPlayer {
+//create robot according to player
+func NewQPvpRobot(player *models.Player, coin, stamina int32) *qPvpPlayer {
 	return &qPvpPlayer{
-		IsRobot:  true,
-		GoldCoin: coin,
-		Stamina:  stamina,
-		Answers:  make(map[int]*qPvpAnswer, 0),
-		WS:       nil,
+		IsRobot:   true,
+		GoldCoin:  coin,
+		Stamina:   stamina,
+		Answers:   make(map[int]*qPvpAnswer, 0),
+		WS:        nil,
+		mp:        player,
+		robotEcho: make(chan *QPvpMsg, 5),
 	}
 }
 
@@ -71,8 +74,9 @@ func (t *qPvpPlayer) workAsPlayer() (err error) {
 	}
 
 	t.markRecvMsg()
+
+	logs.Alert("***********Player[%2d] message reading start*************", t.Side)
 	for {
-		logs.Debug("Waiting for player[%15s] message.... ", t.mp.Name)
 		_, data, e := t.WS.ReadMessage()
 		if e != nil {
 			err = e
@@ -91,7 +95,7 @@ func (t *qPvpPlayer) workAsPlayer() (err error) {
 		t.pvp.sendMsg(msg)
 	}
 
-	logs.Alert("QPvp player message loop exit... %s", err.Error())
+	logs.Alert("-------------Player[%2d] message reading end exit [%v]-------------", t.Side, err)
 
 	return err
 }
@@ -107,7 +111,6 @@ func (t *qPvpPlayer) workAsRobot() error {
 
 	if t.WS != nil {
 		t.WS.WriteMessage(websocket.CloseMessage, nil)
-		t.WS.Close()
 		t.WS = nil
 	}
 
@@ -115,19 +118,25 @@ func (t *qPvpPlayer) workAsRobot() error {
 		t.robotEcho = make(chan *QPvpMsg, 5)
 	}
 
-	go func(){
-		logs.Info("QPvp player[%2d] working as a robot", t.Side)
+	go func() {
+		logs.Alert("***********Robot[%2d] message routine started [%v]*************", t.Side, t.robotEcho == nil)
 		for {
 			msg := <-t.robotEcho
-			logs.Info("QPvp robot[%2d] receive message %s", t.Side, msg.codeName())
-			if msg.Code == pvpNotifyPvpEnd {
+			logs.Info("Robot[%2d] receive message %s", t.Side, msg.codeName())
+
+			c := msg.Code
+			if c == pvpNotifyPvpEnd {
 				break
 			}
-			//todo how robot act?
-			cpy := &QPvpMsg{Code: msg.Code, TimeStamp: msg.TimeStamp, Side: t.Side, Data: msg.Data}
-			t.pvp.sendMsg(cpy)
+
+			if c == pvpMsgAnswerRound || c == pvpMsgAnswerHint || c == pvpMsgAnswerSkip {
+				msg.Side = t.Side
+				t.pvp.sendMsg(msg)
+			} else {
+				logs.Info("Robot[%2d] ignore echo message %s", t.Side, msg.codeName())
+			}
 		}
-		logs.Alert("QPvp robot message routine exit...")
+		logs.Alert("-------------Robot[%2d] message routine exit-------------", t.Side)
 	}()
 
 	return nil
@@ -136,38 +145,35 @@ func (t *qPvpPlayer) workAsRobot() error {
 //should not change any information in data msg
 func (t *qPvpPlayer) notifyPlayer(msg *QPvpMsg) error {
 	if msg == nil || t.IsRobot {
-		logs.Error("notify player of robot or message nil?")
+		logs.Error("send player of robot or message nil?")
 		return nil
+	}
+
+	if msg.Data == "" {
+		msg.Data = "{}"
 	}
 
 	msg.Cs = msg.codeName()
 	data, err := json.Marshal(msg)
 	if err != nil {
-		logs.Error("notify player message[%20s] but marshal error: %s", msg.codeName(), err.Error())
+		logs.Error("send player message[%20s] but marshal error: %s", msg.codeName(), err.Error())
 		return err
 	}
 
-	logs.Info("notify player[%2d] message: %s", t.Side, msg.codeName())
-
 	err = t.WS.WriteMessage(websocket.TextMessage, data)
-	//t.WS.Close()
 	if err != nil {
-		logs.Error("notify player message[%20s] write message error: %s", msg.codeName(), err.Error())
+		logs.Error("send player message[%20s] write message error: %s", msg.codeName(), err.Error())
+		//todo escape ??
+	} else {
+		logs.Info("send player[%2d] message: %s", t.Side, msg.codeName())
 	}
 
 	return err
 }
 
 func (t *qPvpPlayer) notifyPlayerError(err error) error {
-	msg := &QPvpMsg{}
-	t.prepareMsg(msg, pvpNotifyError, err.Error())
-
+	msg, _ := t.prepareMsg(pvpNotifyError, map[string]string{"error": err.Error()})
 	logs.Info("notify player[%2d] error: %s, detail: %s", t.Side, msg.codeName(), err.Error())
-
-	errText, e := json.Marshal(map[string]string{"error": err.Error()})
-	if e == nil {
-		msg.Data = string(errText)
-	}
 
 	data, err := json.Marshal(msg)
 	if err != nil {
@@ -182,7 +188,8 @@ func (t *qPvpPlayer) notifyPlayerError(err error) error {
 
 //should not change any information in data msg
 func (t *qPvpPlayer) notifyRobot(msg *QPvpMsg) error {
-	logs.Info("notify robot[%2d] message: %s", t.Side, msg.codeName())
+	logs.Info("send robot[%2d] message: %s [%v]", t.Side, msg.codeName(), t.robotEcho == nil)
+
 	t.robotEcho <- msg
 	return nil
 }
@@ -190,22 +197,24 @@ func (t *qPvpPlayer) notifyRobot(msg *QPvpMsg) error {
 func (t *qPvpPlayer) prepareRoundAnswer(roundId int) *qPvpAnswer {
 	a, ok := t.Answers[roundId]
 	if !ok {
-		a = &qPvpAnswer{RoundId: roundId, Side: t.Side, AnswerAt: time.Now().Unix()}
+		a = &qPvpAnswer{RoundId: roundId, Side: t.Side}
 		t.Answers[roundId] = a
 	}
 
 	return a
 }
 
-func (t *qPvpPlayer) prepareMsg(msg *QPvpMsg, code int32, payload interface{}) error {
+func (t *qPvpPlayer) prepareMsg(code int32, payload interface{}) (*QPvpMsg, error) {
+	msg := &QPvpMsg{Code: code, Side: t.Side, TimeStamp: time.Now().Unix()}
+
 	data, err := json.Marshal(payload)
+	if err == nil {
+		msg.Data = string(data)
+	} else {
+		msg.Data = string(err.Error())
+	}
 
-	msg.Code = code
-	msg.Data = string(data)
-	msg.Side = t.Side
-	msg.TimeStamp = time.Now().Unix()
-
-	return err
+	return msg, err
 }
 
 func (t *qPvpPlayer) markRecvMsg() {
@@ -214,11 +223,23 @@ func (t *qPvpPlayer) markRecvMsg() {
 }
 
 func (t *qPvpPlayer) playerBrief() *qPvpPlayerBrief {
+	if t.IsRobot {
+		return &qPvpPlayerBrief{
+			Id:      0,
+			Side:    t.Side,
+			Name:    "ROBOT",
+			Rank:    t.mp.Rank,
+			SubRank: t.mp.SubRank,
+			Icon:    "ICON_ROBOT",
+		}
+	}
+
 	return &qPvpPlayerBrief{
-		Side: t.Side,
-		Name: t.mp.Name,
-		Rank: t.mp.Rank,
+		Id:      t.mp.Id,
+		Side:    t.Side,
+		Name:    t.mp.Name,
+		Rank:    t.mp.Rank,
 		SubRank: t.mp.SubRank,
-		Icon: t.mp.Icon,
+		Icon:    t.mp.Icon,
 	}
 }

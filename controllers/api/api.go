@@ -18,8 +18,8 @@ var ApiRouter = &RouterGroup{
 	Namespace: "/api/",
 
 	Routers: map[string]IExport{
-		"login": &LoginController{},
-		"token": &TokenController{},
+		"login":  &LoginController{},
+		"token":  &TokenController{},
 		"battle": &BattleController{},
 	},
 }

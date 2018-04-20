@@ -82,6 +82,7 @@ type qPvpHint struct {
 }
 
 type qPvpPlayerBrief struct {
+	Id      int64
 	Side    int
 	Name    string
 	Rank    int

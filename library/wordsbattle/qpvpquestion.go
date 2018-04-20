@@ -8,6 +8,10 @@ import (
 )
 
 func (t *qPvpQuestion) checkAnswer(answer *qPvpAnswer, p *qPvpPlayer) {
+	answer.AnswerAt = time.Now().Unix()
+	answer.Side = p.Side
+	answer.RoundId = t.RoundId
+
 	//TODO ANSWER IS RIGHT?
 	answer.IsCorrect = true
 	if p.mp != nil && !p.IsRobot && !p.Escaped {
@@ -17,12 +21,13 @@ func (t *qPvpQuestion) checkAnswer(answer *qPvpAnswer, p *qPvpPlayer) {
 }
 
 func (t *qPvp) _cacheQuestion(lastRound, num int) {
-	for i:=1; i < num; i++ {
+	t.Alert("Cacheing questions (%d) + %d", lastRound, num)
+	for i := 1; i <= num; i++ {
 		t.questions[lastRound+i] = &qPvpQuestion{
-			RoundId: 0,
+			RoundId:    0,
 			QuestionId: fmt.Sprintf("question_%d", i),
-			Question: "question test",
-			Hint:     "answer hint",
+			Question:   "question test",
+			Hint:       "answer hint",
 		}
 	}
 }
@@ -35,7 +40,6 @@ func (t *qPvp) cacheSomeQuestions() {
 	//TODO get several questions, numbered by t.RoundNum
 	if t.IsPvp {
 		t._cacheQuestion(0, t.RoundNum)
-		t.questions = make(map[int]*qPvpQuestion, t.RoundNum)
 	} else {
 		more := 5
 		t._cacheQuestion(t.RoundNum, more)
@@ -73,14 +77,9 @@ func (t *qPvp) handlePlayerAnswer(player *qPvpPlayer, msg *QPvpMsg) *qPvpAnswer 
 
 	t.curQuestion.checkAnswer(answer, player)
 
-	err = player.prepareMsg(msg, pvpNotifyAnswerCheck, answer)
+	ack, _ := player.prepareMsg(pvpNotifyAnswerCheck, answer)
 
-	if err != nil {
-		player.notifyPlayerError(err)
-		return answer
-	}
-
-	player.notifyPlayer(msg)
+	player.notifyPlayer(ack)
 
 	return answer
 }
@@ -105,13 +104,9 @@ func (t *qPvp) handlePlayerRequestHint(player *qPvpPlayer, msg *QPvpMsg) *qPvpHi
 
 	hint.Hint = "string" //TODO
 
-	err = player.prepareMsg(msg, pvpNotifyAnswerHint, hint)
-	if err != nil {
-		player.notifyPlayerError(err)
-		return hint
-	}
+	ack, _ := player.prepareMsg(pvpNotifyAnswerHint, hint)
 
-	player.notifyPlayer(msg)
+	player.notifyPlayer(ack)
 
 	player.HintUsed += 1
 
@@ -121,6 +116,7 @@ func (t *qPvp) handlePlayerRequestHint(player *qPvpPlayer, msg *QPvpMsg) *qPvpHi
 func (t *qPvp) handlePlayerSkipRound(player *qPvpPlayer, msg *QPvpMsg) *qPvpHint {
 	skip := &qPvpHint{}
 
+	//if no answer is made, fake one
 	player.prepareRoundAnswer(t.curRound)
 
 	if player.SkipUsed >= player.SkipMax {
@@ -144,14 +140,9 @@ func (t *qPvp) handlePlayerSkipRound(player *qPvpPlayer, msg *QPvpMsg) *qPvpHint
 		//TODO robot random set answer
 	}
 
-	err = player.prepareMsg(msg, pvpNotifyAnswerHint, skip)
-	if err != nil {
-		player.notifyPlayerError(err)
-		return skip
-	}
-
+	ack, _ := player.prepareMsg(pvpNotifyAnswerHint, skip)
 	//SKIP ALSO GIVE RIGHT ANSWER AS HINT
-	player.notifyPlayer(msg)
+	player.notifyPlayer(ack)
 
 	player.SkipUsed += 1
 

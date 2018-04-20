@@ -1,17 +1,16 @@
 package wb
 
 import (
-	"github.com/astaxie/beego/logs"
-	"time"
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 const (
-	ctrlStatusNormal = 0
+	ctrlStatusNormal    = 0
 	ctrlStatusTinyError = 1
-	ctrlStatusCritical = 2
-	ctrlStatusFinished = 3
+	ctrlStatusCritical  = 2
+	ctrlStatusFinished  = 3
 )
 
 type qPvpCmd struct {
@@ -24,10 +23,9 @@ func (t *qPvpCmd) codeName() string {
 }
 
 func (t *qPvp) startCtrlRoutine() {
-
 	t.status = ctrlStatusNormal
 	go func() {
-		logs.Alert("QPvp[%s] routine started", t.Guid)
+		t.Alert("***********Main routine started*************")
 		ticker := time.NewTicker(10 * time.Second)
 		for {
 			select {
@@ -43,12 +41,12 @@ func (t *qPvp) startCtrlRoutine() {
 				break
 			}
 		}
-		logs.Alert("QPvp[%s] main routine exit, status %d ", t.Guid, t.status)
+		t.Alert("-------------Main routine exit [%v]-------------", t.err)
 	}()
 }
 
 func (t *qPvp) HandleCmd(cmd *qPvpCmd) {
-	logs.Info("QPvp[%s] begin to handle cmd: %s", t.Guid, cmd.codeName())
+	t.Info("Handle cmd: %s", cmd.codeName())
 	switch cmd.Code {
 	case pvpCmdJoin:
 		t.onCmdJoin(cmd.Data)
@@ -166,9 +164,9 @@ func (t *qPvp) genNextRoundMsg() *QPvpMsg {
 	}
 
 	notify := &qPvpNotifyNextRound{
-		Question: question,
-		LastQuestion:  t.curQuestion,
-		LastAnswers: t.getRoundAnswers(t.curRound),
+		Question:     question,
+		LastQuestion: t.curQuestion,
+		LastAnswers:  t.getRoundAnswers(t.curRound),
 	}
 
 	t.curQuestion = question
@@ -187,7 +185,7 @@ func (t *qPvp) genNextRoundMsg() *QPvpMsg {
 	}
 }
 
-func (t *qPvp) genEscapeMsg(d interface{}) *QPvpMsg{
+func (t *qPvp) genEscapeMsg(d interface{}) *QPvpMsg {
 	ep, ok := d.(*qPvpPlayer)
 	if !ok {
 		t.errorEnd(errors.New("pvp on cmd escape, payload not valid player"))
@@ -209,19 +207,18 @@ func (t *qPvp) genEscapeMsg(d interface{}) *QPvpMsg{
 func (t *qPvp) genFinishMsg() *QPvpMsg {
 	return &QPvpMsg{
 		Code:      pvpNotifyPvpEnd,
-		TimeStamp: time.Now().Unix(),
 		Side:      pvpSideServer,
+		TimeStamp: time.Now().Unix(),
 	}
 }
 
-
-
 func (t *qPvp) broadCastMsg(msg *QPvpMsg, escapeSide ...int) {
 	if msg == nil {
-		logs.Info("Broadcat nil message?")
+		t.Info("Broadcat nil message?")
 		return
 	}
-	logs.Info("Broadcat message [%20s]", msg.codeName())
+
+	t.Info("Broadcat message [%20s]", msg.codeName())
 
 	if len(escapeSide) == 0 {
 		escapeSide = []int{-1}
@@ -241,6 +238,6 @@ func (t *qPvp) broadCastMsg(msg *QPvpMsg, escapeSide ...int) {
 
 func (t *qPvp) errorEnd(err error) {
 	t.err = err
-	logs.Alert(err.Error())
+	t.Alert("Will ending this pvp, reason: %s", err.Error())
 	t.sendCmd(&qPvpCmd{Code: pvpCmdErrEnd, Data: err})
 }

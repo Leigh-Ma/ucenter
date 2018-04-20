@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/astaxie/beego/session/mysql"
 	"os"
+	"ucenter/library/types"
 	_ "ucenter/routers"
 )
 
@@ -14,6 +15,7 @@ func main() {
 }
 
 func initOrm() {
+	types.InitIDGen("123")
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 
 	orm.RegisterDataBase("default", "mysql", "root:123456@tcp(127.0.0.1:3306)/UCENTER?charset=utf8&loc=UTC")

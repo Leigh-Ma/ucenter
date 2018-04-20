@@ -1,8 +1,8 @@
 package wb
 
 import (
+	"github.com/gorilla/websocket"
 	"time"
-	"github.com/astaxie/beego/logs"
 )
 
 func (t *qPvp) started() {
@@ -14,10 +14,17 @@ func (t *qPvp) started() {
 }
 
 func (t *qPvp) finished() {
+	time.Sleep(2 * time.Second)
 	qPvpON.delQPvp(t)
 	t.status = ctrlStatusFinished
+	for _, player := range t.players {
+		if player.WS != nil {
+			player.WS.WriteMessage(websocket.CloseMessage, nil)
+			player.WS = nil
+		}
+	}
+	t.Alert("@@@@@@@@@Over@@@@@@@@@@")
 }
-
 
 func (t *qPvp) moreRound() bool {
 	return t.curRound < t.RoundNum
@@ -25,7 +32,7 @@ func (t *qPvp) moreRound() bool {
 
 func (t *qPvp) sendCmd(cmd *qPvpCmd) {
 	if t.status >= ctrlStatusCritical {
-		logs.Alert("Cmd send after ctrlStatusCritical: %d, last error %s", cmd.Code, t.err.Error())
+		t.Alert("Cmd send after ctrlStatusCritical: %s, last error %s", cmd.codeName(), t.err.Error())
 		return
 	}
 	t.cmd <- cmd
@@ -33,7 +40,7 @@ func (t *qPvp) sendCmd(cmd *qPvpCmd) {
 
 func (t *qPvp) sendMsg(msg *QPvpMsg) {
 	if t.status >= ctrlStatusCritical {
-		logs.Alert("Msg send after ctrlStatusCritical: %d, last error %s", msg.Code, t.err.Error())
+		t.Alert("Msg send after ctrlStatusCritical: %s, last error %s", msg.codeName(), t.err.Error())
 		return
 	}
 	t.msg <- msg
@@ -68,13 +75,12 @@ func (t *qPvp) isAllPlayerAnswered(msg *QPvpMsg) bool {
 	return true
 }
 
-
 func (t *qPvp) getPlayerBySide(side int) *qPvpPlayer {
 	p := t.players[side]
 	return p
 }
 
-func (t *qPvp) allPlayerBrief() (r []*qPvpPlayerBrief){
+func (t *qPvp) allPlayerBrief() (r []*qPvpPlayerBrief) {
 	for _, p := range t.players {
 		r = append(r, p.playerBrief())
 	}

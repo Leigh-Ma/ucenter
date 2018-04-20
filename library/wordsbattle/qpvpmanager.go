@@ -2,6 +2,7 @@ package wb
 
 import (
 	"sync"
+	"ucenter/library/types"
 )
 
 var (
@@ -9,7 +10,7 @@ var (
 	qPvpON      = newQPvpManager()
 )
 
-func GetAWaitingQPvp(level int) *qPvp {
+func GetAPvpRoom(level int) *qPvp {
 	q := qPvpWaiting.matchOneQPvpByLevel(level)
 	if q == nil {
 		q = newQPvp(2, level, 5)
@@ -18,24 +19,30 @@ func GetAWaitingQPvp(level int) *qPvp {
 	return q
 }
 
+func GetAPveRoom(level int) *qPvp {
+	q := newQPvp(2, level, 5)
+	return q
+}
+
 func GetAPracticeRoom(level int) *qPvp {
-	p := newQPvp(1, level, 0)
-	p.IsPvp = false
-	return p
+	q := newQPvp(1, level, 0)
+	q.IsPvp = false
+	qPvpWaiting.addQPvp(q)
+	return q
 }
 
 type qPvpManager struct {
 	sync.RWMutex
-	PS map[string]*qPvp
+	PS map[types.IdString]*qPvp
 }
 
 func newQPvpManager() *qPvpManager {
 	return &qPvpManager{
-		PS: make(map[string]*qPvp, 0),
+		PS: make(map[types.IdString]*qPvp, 0),
 	}
 }
 
-func (t *qPvpManager) getQPvp(guid string) *qPvp {
+func (t *qPvpManager) getQPvp(guid types.IdString) *qPvp {
 	t.RLock()
 	p := t.PS[guid]
 	t.RUnlock()

@@ -7,9 +7,9 @@ type Player struct {
 	TCom
 	UserId   int64
 	Name     string
-	Rank   int
-	SubRank int
-	Icon string
+	Rank     int
+	SubRank  int
+	Icon     string
 	GoldCoin int
 	helper.Recovery
 }

@@ -1,16 +1,15 @@
 package wb
 
 import (
+	"github.com/pkg/errors"
 	"time"
 	"ucenter/library/types"
-	"github.com/pkg/errors"
-	"github.com/astaxie/beego/logs"
 )
 
 type qPvp struct {
-	Guid           string
-	Level          int
-	Subject        string
+	Guid    types.IdString
+	Level   int
+	Subject string
 
 	CreateAt       int64
 	StartThreshold int //player num when player started
@@ -18,7 +17,7 @@ type qPvp struct {
 	IsPvp          bool
 	ticker         int //heart beat times
 
-	allOffLine bool
+	allOffLine  bool
 	curRound    int
 	curQuestion *qPvpQuestion
 	questions   map[int]*qPvpQuestion
@@ -28,13 +27,12 @@ type qPvp struct {
 	cmd    chan *qPvpCmd
 	msg    chan *QPvpMsg
 
-
 	players map[int]*qPvpPlayer
 }
 
 func newQPvp(startThreshold, level, round int) *qPvp {
 	q := &qPvp{
-		Guid:           types.NewGuid().String(),
+		Guid:           types.NewIdString(),
 		Level:          level,
 		StartThreshold: startThreshold,
 		RoundNum:       round,
@@ -45,23 +43,22 @@ func newQPvp(startThreshold, level, round int) *qPvp {
 		players:        make(map[int]*qPvpPlayer, 2),
 	}
 
-	qPvpWaiting.addQPvp(q)
-
 	q.startCtrlRoutine()
 
 	return q
 }
 
 func (t *qPvp) Join(p *qPvpPlayer, vsRobot ...bool) error {
-
 	t.sendCmd(&qPvpCmd{Code: pvpCmdJoin, Data: p})
+	p.pvp = t
 
 	//if vs a robot or just practice, join a robot as opponent
 	if len(vsRobot) > 0 && vsRobot[0] {
-		t.joinARobot(p.GoldCoin, p.Stamina)
+		if err := t.joinARobot(p); err != nil {
+			t.sendCmd(&qPvpCmd{Code: pvpCmdErrEnd, Data: err})
+			return err
+		}
 	}
-
-	p.pvp = t
 
 	if p.IsRobot {
 		//start a robot process routine
@@ -73,10 +70,9 @@ func (t *qPvp) Join(p *qPvpPlayer, vsRobot ...bool) error {
 
 }
 
-
 func (t *qPvp) CheckTimeout() {
 	t.ticker += 1
-	logs.Debug("QPvp Tick[%3d], round(%2d/%2d), question: %v", t.ticker, t.curRound, t.RoundNum, t.curQuestion)
+	t.Debug("Tick[%3d], question: %v", t.ticker, t.curQuestion)
 	ts := time.Now().Unix()
 
 	t.chkStartTimeOut(ts)
@@ -89,7 +85,7 @@ func (t *qPvp) chkStartTimeOut(now int64) bool {
 	}
 
 	past := now - t.CreateAt
-	if  past <= pvpCfgStartTimeOut {
+	if past <= pvpCfgStartTimeOut {
 		return false
 	}
 
@@ -105,7 +101,7 @@ func (t *qPvp) chkStartTimeOut(now int64) bool {
 	}
 
 	//todo use robot or end this pvp
-	t.joinARobot(p.GoldCoin, p.Stamina)
+	t.joinARobot(p)
 
 	return true
 }
@@ -116,23 +112,23 @@ func (t *qPvp) chkRoundTimeOut(now int64) bool {
 	}
 
 	past := now - t.curQuestion.QuestionAt
-	if  past <= pvpCfgAnswerTimeout {
+	if past <= pvpCfgAnswerTimeout {
 		return false
 	}
 
 	for _, p := range t.players {
-		if now - p.LastMsgAt <= pvpCfgAnswerTimeout {
+		if now-p.LastMsgAt <= pvpCfgAnswerTimeout {
 			continue
 		}
 		// todo user action time out
 		if !p.IsRobot && !p.Escaped {
-			t.sendCmd(&qPvpCmd{Code: pvpCmdEscape, Data:p})
+			t.sendCmd(&qPvpCmd{Code: pvpCmdEscape, Data: p})
 		}
 	}
 	return false
 }
 
-func (t *qPvp) joinARobot(gold, stamina int32) {
-	robot := NewQPvpRobot(gold, stamina)
-	t.Join(robot)
+func (t *qPvp) joinARobot(mapper *qPvpPlayer) error {
+	robot := NewQPvpRobot(mapper.mp, mapper.GoldCoin, mapper.Stamina)
+	return t.Join(robot)
 }
