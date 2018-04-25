@@ -18,28 +18,29 @@ func (c *UserController) ModifyPassword() {
 	}
 
 	if f.Password == f.PasswordNew {
-		resp.Error(http.ERR_PASSWORD_NOT_CHANGED)
-		c.renderJson(resp)
+		c.renderJson(resp.Error(http.ERR_PASSWORD_NOT_CHANGED))
 		return
 	}
 
-	user, isNew := models.UserM.GetByEmail(f.Email)
-	if isNew {
-		resp.Error(http.ERR_EMAIL_NOT_REGISTERED)
-		c.renderJson(resp)
+	user := models.GetUserByEmail(f.Email)
+	if user.IsNew() {
+		c.renderJson(resp.Error(http.ERR_EMAIL_NOT_REGISTERED))
 		return
 	}
 
 	user.SetPassword(f.Password)
 	if _, err := user.Update(user); err != nil {
-		resp.Error(http.ERR_DATA_BASE_ERROR)
-		c.renderJson(resp)
+		c.renderJson(resp.Error(http.ERR_DATA_BASE_ERROR))
 		return
 	}
 
-	resp.Success(&http.D{"UserId": user.Id, "Email": user.Email})
+	models.Upsert(user)
 
-	c.renderJson(resp)
+	//expire token
+	c.renderJson(resp.Success(&http.D{
+		"UserId": user.Id,
+		"Email": user.Email,
+	}))
 }
 
 func (c *UserController) Export() func(string) {

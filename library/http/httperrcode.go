@@ -20,6 +20,9 @@ const (
 	//## User action
 	ERR_PASSWORD_NOT_CHANGED = 1101
 	//## Register
+	//## Sign tasks
+	ERR_HAVE_SIGNED_TODAY = 1301
+	ERR_HOUR_SIGN_LATER   = 1302
 	//### Password
 	ERR_PASSWORD_MISMATCH = 2001
 	ERR_PASSWORD_INVALID  = 2002
@@ -49,6 +52,9 @@ var ErrDesc = map[uint]string{
 	//## User action
 	ERR_PASSWORD_NOT_CHANGED: "Password is not changed",
 	//## Register
+	//## Sign tasks
+	ERR_HAVE_SIGNED_TODAY: "You have signed today",
+	ERR_HOUR_SIGN_LATER:   "You should gain hourly reward later",
 	//### Password
 	ERR_PASSWORD_MISMATCH: "Password mismatch",
 	ERR_PASSWORD_INVALID:  "Password rules not satisfied",

@@ -22,6 +22,10 @@
 
 ### Register
 
+### Sign tasks
+1301-HAVE_SIGNED_TODAY-You have signed today
+1302-HOUR_SIGN_LATER-You should gain hourly reward later
+
 #### Password
 2001-PASSWORD_MISMATCH-Password mismatch
 2002-PASSWORD_INVALID-Password rules not satisfied

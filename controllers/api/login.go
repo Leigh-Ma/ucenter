@@ -17,11 +17,16 @@ func (c *LoginController) VisitorLogin() {
 		return
 	}
 
-	user, _ := models.UserM.GetVisitor(f.Uuid)
+	user := models.GetUserByUuid(f.Uuid)
+	if user.IsNew() {
+		user.Insert(user)
+	}
 
-	auth := models.TokenM.GetUserToken(user.Id)
+	auth := models.GetAuthToken(user.GetId())
 
 	auth.SetNewToken(user.Id, 24*3600)
+
+	models.Upsert(auth)
 
 	resp.Success(&http.D{"Token": auth.Token, "UserId": user.Id})
 
@@ -35,12 +40,21 @@ func (c *LoginController) TokenLogin() {
 		return
 	}
 
-	status := models.TokenM.VerifyToken(f.UserId, f.Token)
-
-	resp.Set(status, &http.D{
+	resp.Success(&http.D{
 		"Token":  f.Token,
 		"UserId": f.UserId,
 	})
+
+	player := models.GetPlayer(f.UserId)
+	if player.IsNew() {
+		resp.Error(http.ERR_USER_ID_INVALID)
+		c.renderJson(resp)
+		return
+	}
+
+	auth := models.GetAuthToken(f.UserId)
+
+	resp.Set(auth.VerifyToken(f.Token))
 
 	c.renderJson(resp)
 }
@@ -52,8 +66,8 @@ func (c *LoginController) Login() {
 		return
 	}
 
-	user, isNew := models.UserM.GetByEmail(f.Email, f.Uuid)
-	if isNew {
+	user := models.GetUserByEmail(f.Email)
+	if user.IsNew() {
 		resp.Error(http.ERR_EMAIL_NOT_REGISTERED)
 		c.renderJson(resp)
 		return
@@ -65,9 +79,11 @@ func (c *LoginController) Login() {
 		return
 	}
 
-	auth := models.TokenM.GetUserToken(user.Id)
+	auth := models.GetAuthToken(user.GetId())
 
 	auth.SetNewToken(user.Id, 24*3600)
+
+	models.Upsert(auth)
 
 	resp.Success(&http.D{"Token": auth.Token, "UserId": user.Id})
 

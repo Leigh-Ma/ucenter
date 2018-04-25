@@ -7,16 +7,16 @@ import (
 	"time"
 )
 
-func (t *qPvpQuestion) checkAnswer(answer *qPvpAnswer, p *qPvpPlayer) {
-	answer.AnswerAt = time.Now().Unix()
-	answer.Side = p.Side
-	answer.RoundId = t.RoundId
+func (t *qPvpQuestion) checkAnswer(p *qPvpPlayer, a *qPvpAnswer) {
+	a.AnswerAt = time.Now().Unix()
+	a.Side = p.Side
+	a.RoundId = t.RoundId
+
 
 	//TODO ANSWER IS RIGHT?
-	answer.IsCorrect = true
-	if p.mp != nil && !p.IsRobot && !p.Escaped {
-		//TODO WRITE LOGS
-		p.mp.DoAnswerLog(t.QuestionId, answer.IsCorrect)
+	a.IsCorrect = true
+	if a.IsCorrect && !p.Escaped {
+		p.Right += 1
 	}
 }
 
@@ -25,7 +25,7 @@ func (t *qPvp) _cacheQuestion(lastRound, num int) {
 	for i := 1; i <= num; i++ {
 		t.questions[lastRound+i] = &qPvpQuestion{
 			RoundId:    0,
-			QuestionId: fmt.Sprintf("question_%d", i),
+			QuestionId: int64(90000+i),
 			Question:   "question test",
 			Hint:       "answer hint",
 		}
@@ -75,7 +75,8 @@ func (t *qPvp) handlePlayerAnswer(player *qPvpPlayer, msg *QPvpMsg) *qPvpAnswer 
 		return answer
 	}
 
-	t.curQuestion.checkAnswer(answer, player)
+	t.curQuestion.checkAnswer(player, answer)
+	t.doAnswerLog(player, answer)
 
 	ack, _ := player.prepareMsg(pvpNotifyAnswerCheck, answer)
 
@@ -102,7 +103,8 @@ func (t *qPvp) handlePlayerRequestHint(player *qPvpPlayer, msg *QPvpMsg) *qPvpHi
 		return hint
 	}
 
-	hint.Hint = "string" //TODO
+	//set hint
+	hint.Hint = t.getHintForPlayer(player)
 
 	ack, _ := player.prepareMsg(pvpNotifyAnswerHint, hint)
 

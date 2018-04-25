@@ -17,26 +17,29 @@ func (d *D) Set(key string, value interface{}) {
 	m[key] = value
 }
 
-func (r *JResp) Success(d ...*D) {
+func (r *JResp) Success(d ...*D) *JResp{
 	r.ErrorCode = OK
 	r.ErrorReason = "success"
 	if len(d) > 0 {
 		r.Data = d[0]
 	}
+	return r
 }
 
-func (r *JResp) Error(code uint, more ...string) {
+func (r *JResp) Error(code uint, more ...string) *JResp {
 	r.ErrorCode = code
 	r.ErrorReason = ErrDesc[code]
 
 	if len(more) > 0 {
 		r.ErrorReason += ": " + more[0]
 	}
+	return r
 }
 
-func (r *JResp) Set(code uint, d ...*D) {
+func (r *JResp) Set(code uint, d ...*D) *JResp {
 	r.Error(code)
 	if len(d) > 0 {
 		r.Data = d[0]
 	}
+	return r
 }

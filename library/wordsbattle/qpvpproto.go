@@ -60,7 +60,7 @@ const (
 //client msg data --> pvpMsgAnswerRound
 type qPvpQuestion struct {
 	RoundId     int    // server, set after answered
-	QuestionId  string // server
+	QuestionId  int64 // server
 	Question    string // server
 	QuestionAt  int64  // server
 	AnswerAllAt int64  // server
@@ -74,6 +74,7 @@ type qPvpAnswer struct {
 	Side      int   // server
 	IsCorrect bool  // server
 	AnswerAt  int64 // server
+	Hinted    bool  `json:"-"`// server
 }
 
 type qPvpHint struct {

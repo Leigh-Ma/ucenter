@@ -31,6 +31,7 @@ type qPvpPlayer struct {
 	HintUsed int
 	SkipMax  int
 	SkipUsed int
+	Right    int
 
 	Answers   map[int]*qPvpAnswer //roundId
 	WS        qPvpWs

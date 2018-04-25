@@ -23,6 +23,8 @@ func (t *qPvp) finished() {
 			player.WS = nil
 		}
 	}
+	//TODO REWARDS?
+	t.doPvpLog()
 	t.Alert("@@@@@@@@@Over@@@@@@@@@@")
 }
 
@@ -111,4 +113,10 @@ func (t *qPvp) isAllOffLine() bool {
 
 func (t *qPvp) canStartPvp() bool {
 	return len(t.players) >= int(t.StartThreshold)
+}
+
+func (t *qPvp) getHintForPlayer(player *qPvpPlayer) string {
+	a := player.prepareRoundAnswer(t.curRound)
+	a.Hinted = true
+	return t.curQuestion.Hint
 }

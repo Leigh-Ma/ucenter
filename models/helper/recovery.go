@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	recoveryTypeStamina = int8(1)
+	RecoveryTypeStamina = int8(1)
 )
 
 type recoverConfig struct {
@@ -19,12 +19,12 @@ type recoverConfig struct {
 }
 
 var recoverCfg = map[int8]*recoverConfig{
-	recoveryTypeStamina: {
+	RecoveryTypeStamina: {
 		recoverDuration: 10,
 		recoverVal:      10,
 		valInit:         10,
 		valMax:          10,
-		typ:             recoveryTypeStamina,
+		typ:             RecoveryTypeStamina,
 		instant:         false,
 	},
 }

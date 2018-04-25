@@ -22,9 +22,9 @@ func (c *RegisterController) Register() {
 		return
 	}
 
-	user, isNew := models.UserM.GetByEmail(f.Email, f.Uuid)
-	if !isNew {
-		resp.Error(http.ERR_PASSWORD_MISMATCH)
+	user := models.GetUserByEmail(f.Email)
+	if !user.IsNew() {
+		resp.Error(http.ERR_EMAIL_HAS_BEEN_TAKEN)
 		c.renderJson(resp)
 		return
 	}
@@ -35,6 +35,8 @@ func (c *RegisterController) Register() {
 		c.renderJson(resp)
 		return
 	}
+
+	models.Upsert(user)
 
 	resp.Success(&http.D{"UserId": user.Id, "Email": user.Email})
 

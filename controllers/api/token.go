@@ -18,9 +18,10 @@ func (c *TokenController) Verify() {
 		return
 	}
 
-	status := models.TokenM.VerifyToken(f.UserId, f.Token)
+	auth := models.GetAuthToken(f.UserId)
 
-	resp.Set(status, &http.D{"Token": f.Token})
+	resp.Set(auth.VerifyToken(f.Token), &http.D{"Token": f.Token})
+
 	c.renderJson(resp)
 
 	return

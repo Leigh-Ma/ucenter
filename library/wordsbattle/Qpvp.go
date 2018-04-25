@@ -1,33 +1,30 @@
 package wb
 
 import (
-	"github.com/pkg/errors"
+	"errors"
 	"time"
 	"ucenter/library/types"
 )
 
 type qPvp struct {
-	Guid    types.IdString
-	Level   int
-	Subject string
-
+	Guid           types.IdString
+	Level          int
+	Subject        string
 	CreateAt       int64
 	StartThreshold int //player num when player started
 	RoundNum       int
 	IsPvp          bool
 	ticker         int //heart beat times
+	allOffLine     bool
+	curRound       int
+	questions      map[int]*qPvpQuestion
+	players        map[int]*qPvpPlayer
 
-	allOffLine  bool
-	curRound    int
-	curQuestion *qPvpQuestion
-	questions   map[int]*qPvpQuestion
-
-	err    error
-	status int
-	cmd    chan *qPvpCmd
-	msg    chan *QPvpMsg
-
-	players map[int]*qPvpPlayer
+	curQuestion    *qPvpQuestion `json:"-"`
+	err            error  `json:"-"`
+	status         int    `json:"-"`
+	cmd            chan *qPvpCmd `json:"-"`
+	msg            chan *QPvpMsg `json:"-"`
 }
 
 func newQPvp(startThreshold, level, round int) *qPvp {

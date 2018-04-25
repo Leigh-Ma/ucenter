@@ -9,13 +9,24 @@ type ITable interface {
 	TableName() string
 	SetId(id int64)
 	GetId() int64
+	IsNew() bool
+	Com() *TCom
 }
 
 type TCom struct {
 	Id        int64     `orm:"auto"`
 	CreatedAt time.Time `orm:"auto_now_add;type(datetime)"`
 	UpdatedAt time.Time `orm:"auto_now;type(datetime)"`
+	isNew     bool      `orm:"-"`
 	dbh       *dbh      `orm:"-"`
+}
+
+func (t *TCom) IsNew() bool{
+	return t.isNew
+}
+
+func (t *TCom) Com() *TCom {
+	return t
 }
 
 func (t *TCom) SetId(id int64) {
@@ -35,6 +46,13 @@ func (t *TCom) Transaction(dbOperations func(*dbh) error) error {
 		t.dbh = DBH()
 	}
 	return t.dbh.Transaction(dbOperations)
+}
+
+func (t *TCom) Reload(obj ITable) error {
+	if t.dbh == nil {
+		t.dbh = DBH()
+	}
+	return t.dbh.FindBy("id", t.Id, obj)
 }
 
 func (t *TCom) FindBy(field string, value interface{}, obj ITable) error {

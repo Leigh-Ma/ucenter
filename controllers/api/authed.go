@@ -12,3 +12,7 @@ type authorizedController struct {
 func (c *authorizedController) Prepare() {
 
 }
+
+func (c *authorizedController) currentPlayer() *models.Player {
+	return models.GetPlayer(c.user.GetId())
+}

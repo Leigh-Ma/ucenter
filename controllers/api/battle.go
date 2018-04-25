@@ -15,8 +15,7 @@ func (c *BattleController) Practice() {
 	resp := &http.JResp{}
 	ws, err := c.WebSocket(c.apiController)
 	if err != nil {
-		resp.Error(http.ERR_WEB_SOCKET_NEEDED, err.Error())
-		c.renderJson(resp)
+		c.renderJson(resp.Error(http.ERR_WEB_SOCKET_NEEDED, err.Error()))
 		return
 	}
 
@@ -33,8 +32,7 @@ func (c *BattleController) Practice() {
 		return
 	}
 
-	resp.Success()
-	c.renderJson(resp)
+	c.renderJson(resp.Success())
 }
 
 func (c *BattleController) VsRobot() {
@@ -59,8 +57,7 @@ func (c *BattleController) VsRobot() {
 		return
 	}
 
-	resp.Success()
-	c.renderJson(resp)
+	c.renderJson(resp.Success())
 }
 
 func (c *BattleController) Export() func(string) {
