@@ -4,13 +4,16 @@ package models
 type AnswerLog struct {
 	TCom
 	PlayerId    int64
-	QuestionId   int64
+	Pass        bool
+	QuestionId  int64
+	Keyword     string
 	PvpId       string
 	Answer      string
-	Failed       int
+	Failed      int
 	Right       int
 	Hinted      bool
 	FirstFail  int64
+	LastFail   int64
 }
 
 func NewAnswerLog(playerId, questionId int64) *AnswerLog {

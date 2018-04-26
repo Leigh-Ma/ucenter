@@ -66,7 +66,7 @@ func NewGuid() *Guid {
 
 // NewString is a helper function that returns a random RFC 4122-comformant
 // version 4 Guid as a string.
-func NewString() string {
+func NewGuidString() string {
 	return NewGuid().String()
 }
 

@@ -2,6 +2,7 @@ package models
 
 import (
 	"time"
+	"github.com/astaxie/beego/orm"
 )
 
 const (
@@ -25,8 +26,7 @@ type Player struct {
 	PvpLose       int64
 	PvpWinGold    int64
 	PvpLoseGold   int64
-
-	daily         *PlayerSign `json:"-",orm:"-"`
+	Payed         float32
 }
 
 func NewPlayer(accountId int64, name string) *Player{
@@ -38,8 +38,19 @@ func NewPlayer(accountId int64, name string) *Player{
 	return p
 }
 
+func (t *Player) OnInit() {
+	t.GoldCoin = 100
+	t.Stamina = 99
+	t.Rank = 1
+}
+
 func (t *Player) TableName() string {
 	return "players"
+}
+
+func (t *Player) QueryCond() *orm.Condition {
+	c := orm.NewCondition()
+	return c.And("player_id", t.GetId())
 }
 
 func (t *Player) OnPvpWin() {
@@ -107,4 +118,9 @@ func (t *Player) recover() {
 			t.LastRefreshAt += int64(past)
 		}
 	}
+}
+
+
+func (p *Player) Bought(price float32, product string, amount int) bool {
+	return false
 }

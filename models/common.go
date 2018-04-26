@@ -5,12 +5,16 @@ import (
 	"time"
 )
 
-type ITable interface {
-	TableName() string
+type iCom interface {
 	SetId(id int64)
 	GetId() int64
 	IsNew() bool
-	Com() *TCom
+	MarkOld() bool
+}
+
+type ITable interface {
+	TableName() string
+	IDB() *TCom
 }
 
 type TCom struct {
@@ -25,7 +29,13 @@ func (t *TCom) IsNew() bool{
 	return t.isNew
 }
 
-func (t *TCom) Com() *TCom {
+func (t *TCom) MarkOld() bool{
+	i := t.isNew
+	t.isNew = false
+	return i
+}
+
+func (t *TCom) IDB() *TCom {
 	return t
 }
 
@@ -62,11 +72,11 @@ func (t *TCom) FindBy(field string, value interface{}, obj ITable) error {
 	return t.dbh.FindBy(field, value, obj)
 }
 
-func (t *TCom) FindById(obj ITable, id ...int64) error {
+func (t *TCom) FindById(id int64, obj ITable) error {
 	if t.dbh == nil {
 		t.dbh = DBH()
 	}
-	return t.dbh.FindById(obj, id...)
+	return t.dbh.FindBy("id", id, obj)
 }
 
 func (t *TCom) MultiQuery(cond *orm.Condition, table interface{}, cols ...string) ([]orm.Params, int64, error) {
@@ -123,7 +133,7 @@ func (h *dbh) FindBy(field string, value interface{}, obj ITable) error {
 
 func (h *dbh) FindById(obj ITable, id ...int64) error {
 	if len(id) > 0 {
-		obj.SetId(id[0])
+		obj.IDB().SetId(id[0])
 	}
 	return h.Read(obj)
 }

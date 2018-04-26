@@ -8,6 +8,9 @@
 2-DATA_BASE_ERROR-Database operation error
 3-PARAMS_ERROR-Input parameters error
 4-WEB_SOCKET_NEEDED-Should enable web socket in http header
+5-SERVE_JSON_ONLY-We just support json request type
+6-PLEASE_RE_LOGIN-Please re login, user_id or token invalid
+7-ORDER_PRE_CREATE_ERR-Create order on server error
 
 ## User
 ### Login

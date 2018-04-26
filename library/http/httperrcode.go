@@ -6,10 +6,13 @@ const (
 	//# Common
 	ERR_OK = 0
 	//# Internal
-	ERR_INTERNAL_ERROR    = 1
-	ERR_DATA_BASE_ERROR   = 2
-	ERR_PARAMS_ERROR      = 3
-	ERR_WEB_SOCKET_NEEDED = 4
+	ERR_INTERNAL_ERROR       = 1
+	ERR_DATA_BASE_ERROR      = 2
+	ERR_PARAMS_ERROR         = 3
+	ERR_WEB_SOCKET_NEEDED    = 4
+	ERR_SERVE_JSON_ONLY      = 5
+	ERR_PLEASE_RE_LOGIN      = 6
+	ERR_ORDER_PRE_CREATE_ERR = 7
 	//# User
 	//## Login
 	ERR_EMAIL_NOT_REGISTERED = 1001
@@ -38,10 +41,13 @@ var ErrDesc = map[uint]string{
 	//# Common
 	ERR_OK: "Success",
 	//# Internal
-	ERR_INTERNAL_ERROR:    "Internal error",
-	ERR_DATA_BASE_ERROR:   "Database operation error",
-	ERR_PARAMS_ERROR:      "Input parameters error",
-	ERR_WEB_SOCKET_NEEDED: "Should enable web socket in http header",
+	ERR_INTERNAL_ERROR:       "Internal error",
+	ERR_DATA_BASE_ERROR:      "Database operation error",
+	ERR_PARAMS_ERROR:         "Input parameters error",
+	ERR_WEB_SOCKET_NEEDED:    "Should enable web socket in http header",
+	ERR_SERVE_JSON_ONLY:      "We just support json request type",
+	ERR_PLEASE_RE_LOGIN:      "Please re login, user_id or token invalid",
+	ERR_ORDER_PRE_CREATE_ERR: "Create order on server error",
 	//# User
 	//## Login
 	ERR_EMAIL_NOT_REGISTERED: "Email is not registered",

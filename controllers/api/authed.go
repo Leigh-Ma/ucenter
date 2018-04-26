@@ -2,17 +2,70 @@ package api
 
 import (
 	"ucenter/models"
+	"strconv"
+	"ucenter/library/http"
+	"ucenter/controllers"
+)
+
+const (
+	AuthUserId = "http_user_id"
+	AuthSessionToken = "http_session_token"
 )
 
 type authorizedController struct {
-	apiController
-	user *models.User
+	controllers.ApiController
+	User models.User
+	AuthToken models.AuthToken
+	player *models.Player
+	authed bool
 }
 
-func (c *authorizedController) Prepare() {
-
+func (c *authorizedController) currentUser() *models.User {
+	if c.authed {
+		return &c.User
+	}
+	return nil
 }
 
 func (c *authorizedController) currentPlayer() *models.Player {
-	return models.GetPlayer(c.user.GetId())
+	if c.player == nil {
+		c.player = models.GetPlayer(c.User.GetId())
+		if c.player.IsNew() {
+			c.player.OnInit()
+			models.Upsert(c.player)
+		}
+	}
+
+	return c.player
+}
+
+func (c *authorizedController) renderJson(resp *http.JResp) {
+	c.RenderJson(resp)
+}
+
+func (c *authorizedController) Prepare() {
+	//check url prefix?
+	c.player = nil
+	c.authed = false
+
+	resp := &http.JResp{}
+	status := uint(http.OK)
+
+	id, err := strconv.ParseInt(c.Ctx.Input.Header(AuthUserId), 10, 64)
+	if err != nil || id <= 0 {
+		status = http.ERR_PLEASE_RE_LOGIN
+	} else if err = c.User.FindById(id, &c.User); err != nil {
+		status = http.ERR_PLEASE_RE_LOGIN
+	} else if err = c.AuthToken.FindBy("user_id", c.User.GetId(), &c.AuthToken); err != nil {
+		resp.Error(http.ERR_PLEASE_RE_LOGIN)
+	} else {
+		status = c.AuthToken.VerifyToken(c.Ctx.Input.Header(AuthSessionToken))
+	}
+
+	if status != http.OK {
+		c.renderJson(resp.Error(status))
+		return
+	}
+
+	c.authed = true
 }

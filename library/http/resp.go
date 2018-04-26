@@ -21,7 +21,7 @@ func (r *JResp) Success(d ...*D) *JResp{
 	r.ErrorCode = OK
 	r.ErrorReason = "success"
 	if len(d) > 0 {
-		r.Data = d[0]
+		r.Set(d[0])
 	}
 	return r
 }
@@ -36,10 +36,25 @@ func (r *JResp) Error(code uint, more ...string) *JResp {
 	return r
 }
 
-func (r *JResp) Set(code uint, d ...*D) *JResp {
-	r.Error(code)
+func (r *JResp) Status(code uint, d... *D) *JResp {
+	r.ErrorCode = code
+	r.ErrorReason = ErrDesc[code]
+
 	if len(d) > 0 {
-		r.Data = d[0]
+		r.Set(d[0])
+	}
+	return r
+}
+
+func (r *JResp) Set(d *D) *JResp {
+	if r.Data == nil {
+		r.Data = d
+	} else {
+		m := r.Data.(*D).Map()
+		n := d.Map()
+		for key, v := range n {
+			m[key] = v
+		}
 	}
 	return r
 }

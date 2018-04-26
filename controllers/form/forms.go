@@ -8,7 +8,7 @@ import (
 )
 
 type FModifyPassword struct {
-	Email       string
+	Email       string `valid:"Email"`
 	Password    string
 	PasswordNew string
 }
@@ -22,7 +22,7 @@ type FRegister struct {
 }
 
 type FPhoneRegister struct {
-	PhoneID    string
+	PhoneID    string `valid:"Phone"`
 	VerifyCode string
 }
 
@@ -37,14 +37,23 @@ type FTokenLogin struct {
 }
 
 type FPasswordLogin struct {
-	Uuid     string
-	Email    string
+	Email    string `valid:"Email" json:"email"`
 	Password string
 }
 
 type FVisitorLogin struct {
 	Uuid   string
 	AppKey string
+}
+
+type FSetPlayerName struct {
+	Name string `valid:""`
+}
+
+type FBuyProduct struct {
+	ProductId string
+	Amount int //>=1
+	Price float32
 }
 
 func shouldBeStructPtr(val reflect.Value) {
@@ -58,7 +67,12 @@ func shouldBeStructPtr(val reflect.Value) {
 }
 
 func ParseForm(form interface{}, values url.Values) {
-	fmt.Printf("%v\n", values)
+	var (
+		value string = ""
+		ok  bool  = false
+		vs []string = nil
+	)
+
 	valPtr := reflect.ValueOf(form)
 
 	shouldBeStructPtr(valPtr)
@@ -81,13 +95,17 @@ func ParseForm(form interface{}, values url.Values) {
 			return
 		}
 
-		value := ""
-		var vs []string
-		if v, ok := values[tf.Name]; ok {
-			vs = v
-			if len(vs) > 0 {
-				value = vs[0]
+		tj := tf.Tag.Get("json")
+
+		if vs, ok = values[tf.Name]; !ok {
+			if tj != "" || tj != "-" {
+				vs, ok = values[tj]
 			}
+		}
+
+		value = ""
+		if len(vs) > 0 {
+			value = vs[0]
 		}
 
 		switch tf.Type.Kind() {

@@ -3,19 +3,17 @@ package api
 import (
 	"ucenter/library/http"
 	"ucenter/models"
+	"ucenter/controllers"
 )
 
-type SignController struct {
+type signController struct {
 	authorizedController
 }
 
-func (c *SignController) Daily() {
+func (c *signController) Daily() {
 	resp := &http.JResp{}
+
 	player := c.currentPlayer()
-	if player == nil {
-		c.renderJson(resp.Error(http.ERR_USER_ID_INVALID))
-		return
-	}
 
 	sign := models.GetPlayerSign(player.GetId())
 
@@ -31,13 +29,9 @@ func (c *SignController) Daily() {
 		}))
 }
 
-func (c *SignController) Hour() {
+func (c *signController) Hour() {
 	resp := &http.JResp{}
 	player := c.currentPlayer()
-	if player == nil {
-		c.renderJson(resp.Error(http.ERR_USER_ID_INVALID))
-		return
-	}
 
 	sign := models.GetPlayerSign(player.GetId())
 
@@ -53,8 +47,8 @@ func (c *SignController) Hour() {
 	}))
 }
 
-func (c *SignController) Export() func(string) {
-	return export(c, map[string]string{
+func (c *signController) Export() func(string) {
+	return controllers.Export(c, map[string]string{
 		"POST:  /daily":    "Daily",
 		"POST:  /hour":     "Hour",
 	})

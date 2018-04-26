@@ -18,13 +18,18 @@ func (t *qPvp) doAnswerLog(p *qPvpPlayer, a *qPvpAnswer) {
 	l.PvpId    = t.Guid.ToString()
 
 	if a.IsCorrect {
+		l.Pass = true
 		l.Right += 1
 	} else {
 		l.Failed += 1
 	}
 	
-	if l.IsNew() && !a.IsCorrect{
-		l.FirstFail = a.AnswerAt
+	if !a.IsCorrect{
+		if l.IsNew() {
+			l.FirstFail = a.AnswerAt
+		} else {
+			l.LastFail = a.AnswerAt
+		}
 	}
 
 	models.Upsert(l)

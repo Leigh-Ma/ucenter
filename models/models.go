@@ -5,7 +5,9 @@ import "github.com/astaxie/beego/orm"
 var (
 	models = &MM{
 		Tables: []ITable{
-			&AuthToken{}, &User{}, &Player{},
+			&AuthToken{}, &User{},
+			&Player{}, &Item{}, &PlayerSign{},
+			&AnswerLog{}, &PvpLog{},
 		},
 	}
 )

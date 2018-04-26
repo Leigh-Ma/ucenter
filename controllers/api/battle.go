@@ -4,21 +4,22 @@ import (
 	"ucenter/library/http"
 	"ucenter/library/wordsbattle"
 	"ucenter/models"
+	"ucenter/controllers"
 )
 
-type BattleController struct {
+type battleController struct {
 	authorizedController
-	wsController
 }
 
-func (c *BattleController) Practice() {
+func (c *battleController) Practice() {
 	resp := &http.JResp{}
-	ws, err := c.WebSocket(c.apiController)
+	ws, err := c.WebSocket()
 	if err != nil {
 		c.renderJson(resp.Error(http.ERR_WEB_SOCKET_NEEDED, err.Error()))
 		return
 	}
 
+	//todo test
 	player := &models.Player{Name: "Practice", Rank: 1, SubRank: 3, GoldCoin: 20}
 	player.Id = 1
 
@@ -35,9 +36,9 @@ func (c *BattleController) Practice() {
 	c.renderJson(resp.Success())
 }
 
-func (c *BattleController) VsRobot() {
+func (c *battleController) VsRobot() {
 	resp := &http.JResp{}
-	ws, err := c.WebSocket(c.apiController)
+	ws, err := c.WebSocket()
 	if err != nil {
 		resp.Error(http.ERR_WEB_SOCKET_NEEDED, err.Error())
 		c.renderJson(resp)
@@ -60,8 +61,8 @@ func (c *BattleController) VsRobot() {
 	c.renderJson(resp.Success())
 }
 
-func (c *BattleController) Export() func(string) {
-	return export(c, map[string]string{
+func (c *battleController) Export() func(string) {
+	return controllers.Export(c, map[string]string{
 		"GET:  /practice": "Practice",
 		"GET:  /vsrobot":  "VsRobot",
 	})
