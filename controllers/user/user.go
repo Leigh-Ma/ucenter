@@ -2,7 +2,7 @@ package user
 
 import (
 	"ucenter/controllers"
-	"ucenter/controllers/form"
+	"ucenter/controllers/proto"
 	"ucenter/library/http"
 	"ucenter/models"
 )
@@ -13,7 +13,7 @@ type userController struct {
 
 // POST:  /user/modify_pwd
 func (c *userController) ModifyPassword() {
-	f, resp := &form.FModifyPassword{}, &http.JResp{}
+	f, resp := &proto.FModifyPassword{}, &http.JResp{}
 	if !c.CheckInputs(f, resp) {
 		return
 	}

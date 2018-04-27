@@ -2,7 +2,7 @@ package user
 
 import (
 	"ucenter/controllers"
-	"ucenter/controllers/form"
+	"ucenter/controllers/proto"
 	"ucenter/library/http"
 	"ucenter/models"
 )
@@ -13,7 +13,7 @@ type loginController struct {
 
 // GET /login/visitor
 func (c *loginController) VisitorLogin() {
-	f, resp := &form.FVisitorLogin{}, &http.JResp{}
+	f, resp := &proto.FVisitorLogin{}, &http.JResp{}
 	if !c.CheckInputs(f, resp) {
 		return
 	}
@@ -36,7 +36,7 @@ func (c *loginController) VisitorLogin() {
 
 // GET /login/token
 func (c *loginController) TokenLogin() {
-	f, resp := &form.FTokenLogin{}, &http.JResp{}
+	f, resp := &proto.FTokenLogin{}, &http.JResp{}
 	if !c.CheckInputs(f, resp) {
 		return
 	}
@@ -62,7 +62,7 @@ func (c *loginController) TokenLogin() {
 
 // GET /login
 func (c *loginController) Login() {
-	f, resp := &form.FPasswordLogin{}, &http.JResp{}
+	f, resp := &proto.FPasswordLogin{}, &http.JResp{}
 	if !c.CheckInputs(f, resp) {
 		return
 	}

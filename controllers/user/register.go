@@ -2,7 +2,7 @@ package user
 
 import (
 	"ucenter/controllers"
-	"ucenter/controllers/form"
+	"ucenter/controllers/proto"
 	"ucenter/library/http"
 	"ucenter/models"
 )
@@ -12,7 +12,7 @@ type registerController struct {
 }
 
 func (c *registerController) Register() {
-	f, resp := &form.FRegister{}, &http.JResp{}
+	f, resp := &proto.FRegister{}, &http.JResp{}
 	if !c.CheckInputs(f, resp) {
 		return
 	}

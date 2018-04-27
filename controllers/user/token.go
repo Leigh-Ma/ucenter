@@ -2,7 +2,7 @@ package user
 
 import (
 	"ucenter/controllers"
-	"ucenter/controllers/form"
+	"ucenter/controllers/proto"
 	"ucenter/library/http"
 	"ucenter/models"
 )
@@ -13,7 +13,7 @@ type tokenController struct {
 
 // GET /token/verify
 func (c *tokenController) Verify() {
-	f, resp := &form.FTokenVerify{}, &http.JResp{}
+	f, resp := &proto.FTokenVerify{}, &http.JResp{}
 
 	if !c.CheckInputs(f, resp) {
 		return

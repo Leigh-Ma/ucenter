@@ -2,7 +2,7 @@ package api
 
 import (
 	"ucenter/controllers"
-	"ucenter/controllers/form"
+	"ucenter/controllers/proto"
 	"ucenter/library/http"
 	"ucenter/models"
 )
@@ -12,7 +12,7 @@ type playerController struct {
 }
 
 func (c *playerController) SetName() {
-	resp, f := &http.JResp{}, &form.FSetPlayerName{}
+	resp, f := &http.JResp{}, &proto.FSetPlayerName{}
 	if !c.CheckInputs(f, resp) {
 		return
 	}

@@ -2,7 +2,7 @@ package api
 
 import (
 	"ucenter/controllers"
-	"ucenter/controllers/form"
+	"ucenter/controllers/proto"
 	"ucenter/library/http"
 	"ucenter/library/pay"
 	"ucenter/models"
@@ -13,7 +13,7 @@ type orderController struct {
 }
 
 func (c *orderController) AliPay() {
-	resp, f := &http.JResp{}, &form.FBuyProduct{}
+	resp, f := &http.JResp{}, &proto.FBuyProduct{}
 
 	if !c.CheckInputs(f, resp) {
 		return
@@ -39,7 +39,7 @@ func (c *orderController) AliPay() {
 }
 
 func (c *orderController) WxPay() {
-	resp, f := &http.JResp{}, &form.FBuyProduct{}
+	resp, f := &http.JResp{}, &proto.FBuyProduct{}
 
 	if !c.CheckInputs(f, resp) {
 		return
