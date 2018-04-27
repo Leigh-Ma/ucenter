@@ -1,10 +1,10 @@
 package user
 
 import (
+	"ucenter/controllers"
 	"ucenter/controllers/form"
 	"ucenter/library/http"
 	"ucenter/models"
-	"ucenter/controllers"
 )
 
 type loginController struct {
@@ -93,8 +93,8 @@ func (c *loginController) Login() {
 
 func (c *loginController) Export() func(string) {
 	return controllers.Export(c, map[string]string{
-		"GET:  /visitor":    "VisitorLogin",
-		"GET:  /token":      "TokenLogin",
-		"GET:  /":           "Login",
+		"GET:  /visitor": "VisitorLogin",
+		"GET:  /token":   "TokenLogin",
+		"GET:  /":        "Login",
 	})
 }

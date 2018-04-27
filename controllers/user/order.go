@@ -1,20 +1,18 @@
 package user
 
 import (
+	"encoding/xml"
 	"github.com/astaxie/beego"
+	"ucenter/controllers"
 	"ucenter/library/pay"
 	"ucenter/models"
-	"ucenter/controllers"
-	"encoding/xml"
 )
 
-
 type wxResp struct {
-	XMLName        xml.Name `xml:"xml"`
-	ReturnCode     string   `xml:"return_code"`
-	ReturnMsg      string   `xml:"return_msg"`
+	XMLName    xml.Name `xml:"xml"`
+	ReturnCode string   `xml:"return_code"`
+	ReturnMsg  string   `xml:"return_msg"`
 }
-
 
 type orderCbController struct {
 	beego.Controller
@@ -49,7 +47,7 @@ func (c *orderCbController) AliCb() {
 		msg = "success"
 
 		order := models.GetOrder(r.LocalOrderId())
-		order.WxNotify(r)
+		order.AliNotify(r)
 		models.Upsert(order)
 	} else {
 		msg = err.Error()
@@ -60,9 +58,9 @@ func (c *orderCbController) AliCb() {
 
 func (c *orderCbController) Export() func(string) {
 	return controllers.Export(c, map[string]string{
-		"GET:  /ali_notify":    "AliCb",
-		"GET:  /wx_notify":     "WxCb",
-		"POST: /ali_notify":    "AliCb",
-		"POST: /wx_notify":     "WxCb",
+		"GET:  /ali_notify": "AliCb",
+		"GET:  /wx_notify":  "WxCb",
+		"POST: /ali_notify": "AliCb",
+		"POST: /wx_notify":  "WxCb",
 	})
 }

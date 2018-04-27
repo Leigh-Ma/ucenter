@@ -5,12 +5,12 @@ import (
 	"errors"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
+	"github.com/gorilla/websocket"
+	nh "net/http"
 	"strings"
 	. "ucenter/controllers/form"
 	"ucenter/library/http"
 	"ucenter/library/tools"
-	"github.com/gorilla/websocket"
-	nh "net/http"
 )
 
 var _upg = websocket.Upgrader{}
@@ -45,8 +45,6 @@ func (c *ApiController) RenderJson(resp *http.JResp) {
 	beego.Info("Server Response: ", resp.ErrorCode, ":", resp.ErrorReason)
 	c.ServeJSON()
 }
-
-
 
 func (c *ApiController) Prepare() {
 	if !c.isJsonReq() {
@@ -87,7 +85,6 @@ func (c *ApiController) parseJsonInput(form interface{}) error {
 
 	return err
 }
-
 
 type IExport interface {
 	Export() func(string)

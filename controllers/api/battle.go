@@ -1,10 +1,10 @@
 package api
 
 import (
+	"ucenter/controllers"
 	"ucenter/library/http"
 	"ucenter/library/wordsbattle"
 	"ucenter/models"
-	"ucenter/controllers"
 )
 
 type battleController struct {

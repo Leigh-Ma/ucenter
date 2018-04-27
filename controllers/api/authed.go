@@ -1,23 +1,23 @@
 package api
 
 import (
-	"ucenter/models"
 	"strconv"
-	"ucenter/library/http"
 	"ucenter/controllers"
+	"ucenter/library/http"
+	"ucenter/models"
 )
 
 const (
-	AuthUserId = "http_user_id"
+	AuthUserId       = "http_user_id"
 	AuthSessionToken = "http_session_token"
 )
 
 type authorizedController struct {
 	controllers.ApiController
-	User models.User
+	User      models.User
 	AuthToken models.AuthToken
-	player *models.Player
-	authed bool
+	player    *models.Player
+	authed    bool
 }
 
 func (c *authorizedController) currentUser() *models.User {

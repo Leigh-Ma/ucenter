@@ -1,8 +1,8 @@
 package wb
 
 import (
-	"ucenter/models"
 	"encoding/json"
+	"ucenter/models"
 )
 
 func (t *qPvp) doAnswerLog(p *qPvpPlayer, a *qPvpAnswer) {
@@ -12,10 +12,10 @@ func (t *qPvp) doAnswerLog(p *qPvpPlayer, a *qPvpAnswer) {
 
 	l := models.GetAnswerLog(p.mp.GetId(), t.curQuestion.QuestionId)
 
-	l.Answer   = a.Answer
+	l.Answer = a.Answer
 	l.PlayerId = p.mp.Id
-	l.Hinted   = a.Hinted
-	l.PvpId    = t.Guid.ToString()
+	l.Hinted = a.Hinted
+	l.PvpId = t.Guid.ToString()
 
 	if a.IsCorrect {
 		l.Pass = true
@@ -23,8 +23,8 @@ func (t *qPvp) doAnswerLog(p *qPvpPlayer, a *qPvpAnswer) {
 	} else {
 		l.Failed += 1
 	}
-	
-	if !a.IsCorrect{
+
+	if !a.IsCorrect {
 		if l.IsNew() {
 			l.FirstFail = a.AnswerAt
 		} else {
@@ -43,7 +43,9 @@ func (t *qPvp) doPvpLog() {
 		}
 		qs = append(qs, q.QuestionId)
 	}
+
 	qList := t.asJson(qs)
+	isPvp := t.IsPvp && len(t.players) >= 2
 
 	for _, p := range t.players {
 		if p.IsRobot {
@@ -51,28 +53,28 @@ func (t *qPvp) doPvpLog() {
 		}
 
 		l := models.GetPvpLog(p.mp.GetId())
-		
-		l.PlayerId = p.mp.Id
-		l.PvpId =    t.Guid.ToString()
-		l.Level =    t.Level
-		l.Round =    t.RoundNum
+
+		l.PlayerId = p.mp.GetId()
+		l.PvpId = t.Guid.ToString()
+		l.Level = t.Level
+		l.Round = t.RoundNum
 		l.EscapeAt = p.EscapedRound
-		l.Right =    p.Right
+		l.Right = p.Right
 		l.EarnCoin = int(p.GoldCoin) //TODO
-		l.IsPvp =    t.IsPvp && len(t.players) >= 2
+		l.IsPvp = isPvp
 		l.Questions = qList
-		l.Brief =    t.briefString()
+		l.Brief = t.briefString()
 
 		models.Upsert(l)
 	}
 
 }
 
-func (t *qPvp) briefString()string{
+func (t *qPvp) briefString() string {
 	return "brief"
 }
 
-func (*qPvp) asJson(data interface{}) string{
+func (*qPvp) asJson(data interface{}) string {
 	d, _ := json.Marshal(data)
 	return string(d)
 }

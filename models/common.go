@@ -25,11 +25,11 @@ type TCom struct {
 	dbh       *dbh      `orm:"-"`
 }
 
-func (t *TCom) IsNew() bool{
+func (t *TCom) IsNew() bool {
 	return t.isNew
 }
 
-func (t *TCom) MarkOld() bool{
+func (t *TCom) MarkOld() bool {
 	i := t.isNew
 	t.isNew = false
 	return i

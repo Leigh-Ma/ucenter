@@ -52,8 +52,8 @@ type FSetPlayerName struct {
 
 type FBuyProduct struct {
 	ProductId string
-	Amount int //>=1
-	Price float32
+	Amount    int //>=1
+	Price     float32
 }
 
 func shouldBeStructPtr(val reflect.Value) {
@@ -68,9 +68,9 @@ func shouldBeStructPtr(val reflect.Value) {
 
 func ParseForm(form interface{}, values url.Values) {
 	var (
-		value string = ""
-		ok  bool  = false
-		vs []string = nil
+		value string   = ""
+		ok    bool     = false
+		vs    []string = nil
 	)
 
 	valPtr := reflect.ValueOf(form)

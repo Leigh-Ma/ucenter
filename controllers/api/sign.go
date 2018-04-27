@@ -1,9 +1,9 @@
 package api
 
 import (
+	"ucenter/controllers"
 	"ucenter/library/http"
 	"ucenter/models"
-	"ucenter/controllers"
 )
 
 type signController struct {
@@ -24,9 +24,9 @@ func (c *signController) Daily() {
 	}
 
 	c.renderJson(resp.Success(&http.D{
-		"sign": sign,
+		"sign":    sign,
 		"rewards": nil,
-		}))
+	}))
 }
 
 func (c *signController) Hour() {
@@ -42,14 +42,14 @@ func (c *signController) Hour() {
 	}
 
 	c.renderJson(resp.Success(&http.D{
-		"sign": sign,
+		"sign":    sign,
 		"rewards": nil,
 	}))
 }
 
 func (c *signController) Export() func(string) {
 	return controllers.Export(c, map[string]string{
-		"POST:  /daily":    "Daily",
-		"POST:  /hour":     "Hour",
+		"POST:  /daily": "Daily",
+		"POST:  /hour":  "Hour",
 	})
 }

@@ -16,7 +16,7 @@ type User struct {
 	RawPwd   string
 }
 
-func NewUser() *User{
+func NewUser() *User {
 	return &User{}
 }
 

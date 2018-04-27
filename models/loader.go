@@ -21,8 +21,7 @@ func GetUserByEmail(email string) *User {
 	return t
 }
 
-
-func GetPlayer(userId int64) *Player{
+func GetPlayer(userId int64) *Player {
 	t := NewPlayer(userId, "")
 	err := t.FindBy("user_id", userId, t)
 	t.isNew = (err != nil)
@@ -43,22 +42,21 @@ func GetAuthToken(userId int64) *AuthToken {
 	return t
 }
 
-func GetItem(playerId int64, itemSn string) *Item{
+func GetItem(playerId int64, itemSn string) *Item {
 	t := NewItem(playerId, itemSn)
 	err := t.NewQuery(t).Filter("player_id", playerId).Filter("name", itemSn).One(t)
 	t.isNew = (err != nil)
 	return t
 }
 
-func GetOrder(orderSn string) *Order{
+func GetOrder(orderSn string) *Order {
 	t := &Order{}
 	err := t.FindBy("order_id", orderSn, t)
 	t.isNew = (err != nil)
 	return t
 }
 
-
-func GetAnswerLog(playerId, questionId int64) *AnswerLog{
+func GetAnswerLog(playerId, questionId int64) *AnswerLog {
 	t := NewAnswerLog(playerId, questionId)
 	err := t.NewQuery(t).Filter("player_id", playerId).Filter("question_id", questionId).One(t)
 	t.isNew = (err != nil)
@@ -71,7 +69,7 @@ func GetPvpLog(playerId int64) *PvpLog {
 	return t
 }
 
-func Upsert(obj ITable, cols... string) (i int64, e error) {
+func Upsert(obj ITable, cols ...string) (i int64, e error) {
 	if obj.IDB().IsNew() {
 		i, e = obj.IDB().Insert(obj)
 		if e == nil {
@@ -83,4 +81,3 @@ func Upsert(obj ITable, cols... string) (i int64, e error) {
 
 	return i, e
 }
-

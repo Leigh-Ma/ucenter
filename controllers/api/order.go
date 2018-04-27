@@ -1,11 +1,11 @@
 package api
 
 import (
-	"ucenter/library/http"
-	"ucenter/controllers/form"
-	"ucenter/models"
-	"ucenter/library/pay"
 	"ucenter/controllers"
+	"ucenter/controllers/form"
+	"ucenter/library/http"
+	"ucenter/library/pay"
+	"ucenter/models"
 )
 
 type orderController struct {
@@ -20,7 +20,7 @@ func (c *orderController) AliPay() {
 	}
 
 	player := c.currentPlayer()
-	order := models.NewOrder(player.GetId(), f.Amount, f.ProductId, float32(f.Amount) * f.Price)
+	order := models.NewOrder(player.GetId(), f.Amount, f.ProductId, float32(f.Amount)*f.Price)
 	_, err := order.Insert(order)
 	if err != nil {
 		c.renderJson(resp.Error(http.ERR_ORDER_PRE_CREATE_ERR, err.Error()))
@@ -46,7 +46,7 @@ func (c *orderController) WxPay() {
 	}
 
 	player := c.currentPlayer()
-	order := models.NewOrder(player.GetId(), f.Amount, f.ProductId,  float32(f.Amount) * f.Price)
+	order := models.NewOrder(player.GetId(), f.Amount, f.ProductId, float32(f.Amount)*f.Price)
 	_, err := order.Insert(order)
 	if err != nil {
 		c.renderJson(resp.Error(http.ERR_ORDER_PRE_CREATE_ERR, err.Error()))

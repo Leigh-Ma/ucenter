@@ -1,8 +1,8 @@
 package models
 
 import (
-	"time"
 	"github.com/astaxie/beego/orm"
+	"time"
 )
 
 const (
@@ -12,27 +12,27 @@ const (
 // Player information for all logic
 type Player struct {
 	TCom
-	UserId        int64 //User
-	Name          string
-	Rank          int
-	SubRank       int
-	Icon          string
-	GoldCoin      int
+	UserId   int64 //User
+	Name     string
+	Rank     int
+	SubRank  int
+	Icon     string
+	GoldCoin int
 
 	Stamina       int
 	LastRefreshAt int64
 
-	PvpWin        int64
-	PvpLose       int64
-	PvpWinGold    int64
-	PvpLoseGold   int64
-	Payed         float32
+	PvpWin      int64
+	PvpLose     int64
+	PvpWinGold  int64
+	PvpLoseGold int64
+	Payed       float32
 }
 
-func NewPlayer(accountId int64, name string) *Player{
+func NewPlayer(accountId int64, name string) *Player {
 	p := &Player{
 		UserId: accountId,
-		Name: name,
+		Name:   name,
 	}
 
 	return p
@@ -71,7 +71,7 @@ func (t *Player) OnPvpLose() {
 	t.SubRank -= 1
 }
 
-func (t *Player) StaminaVal() int{
+func (t *Player) StaminaVal() int {
 	t.recover()
 	return t.Stamina
 }
@@ -119,7 +119,6 @@ func (t *Player) recover() {
 		}
 	}
 }
-
 
 func (p *Player) Bought(price float32, product string, amount int) bool {
 	return false

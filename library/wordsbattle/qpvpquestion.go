@@ -12,7 +12,6 @@ func (t *qPvpQuestion) checkAnswer(p *qPvpPlayer, a *qPvpAnswer) {
 	a.Side = p.Side
 	a.RoundId = t.RoundId
 
-
 	//TODO ANSWER IS RIGHT?
 	a.IsCorrect = true
 	if a.IsCorrect && !p.Escaped {
@@ -25,7 +24,7 @@ func (t *qPvp) _cacheQuestion(lastRound, num int) {
 	for i := 1; i <= num; i++ {
 		t.questions[lastRound+i] = &qPvpQuestion{
 			RoundId:    0,
-			QuestionId: int64(90000+i),
+			QuestionId: int64(90000 + i),
 			Question:   "question test",
 			Hint:       "answer hint",
 		}

@@ -9,6 +9,5 @@ type itemController struct {
 }
 
 func (c *itemController) Export() func(string) {
-	return controllers.Export(c, map[string]string{
-	})
+	return controllers.Export(c, map[string]string{})
 }

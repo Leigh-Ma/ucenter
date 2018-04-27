@@ -1,13 +1,12 @@
 package pay
 
 import (
-	"github.com/imzjy/wxpay"
 	"fmt"
-	"strconv"
-	"net/http"
+	"github.com/imzjy/wxpay"
 	"io/ioutil"
+	"net/http"
+	"strconv"
 )
-
 
 var (
 	WxCfg = &wxpay.WxConfig{
@@ -57,7 +56,7 @@ func WxQuery(transId string) (WxPayResult, error) {
 	return WxPayResult(r), err
 }
 
-func WxParseResult(req *http.Request) (IPayResp, error){
+func WxParseResult(req *http.Request) (IPayResp, error) {
 	defer req.Body.Close()
 
 	body, err := ioutil.ReadAll(req.Body)
@@ -77,7 +76,6 @@ func WxParseResult(req *http.Request) (IPayResp, error){
 
 	return (*WxPayResult)(&r), err
 }
-
 
 type WxPayResult wxpay.QueryOrderResult
 

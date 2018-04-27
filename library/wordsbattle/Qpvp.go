@@ -20,11 +20,11 @@ type qPvp struct {
 	questions      map[int]*qPvpQuestion
 	players        map[int]*qPvpPlayer
 
-	curQuestion    *qPvpQuestion `json:"-"`
-	err            error  `json:"-"`
-	status         int    `json:"-"`
-	cmd            chan *qPvpCmd `json:"-"`
-	msg            chan *QPvpMsg `json:"-"`
+	curQuestion *qPvpQuestion `json:"-"`
+	err         error         `json:"-"`
+	status      int           `json:"-"`
+	cmd         chan *qPvpCmd `json:"-"`
+	msg         chan *QPvpMsg `json:"-"`
 }
 
 func newQPvp(startThreshold, level, round int) *qPvp {

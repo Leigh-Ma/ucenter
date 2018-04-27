@@ -1,10 +1,10 @@
 package pay
 
-import(
+import (
+	"fmt"
 	"github.com/smartwalle/alipay"
 	"net/http"
 	"strconv"
-	"fmt"
 )
 
 type aliCfg struct {
@@ -27,7 +27,7 @@ var (
 		AliCfg.IsProduction)
 )
 
-func AliPreOrder(orderId string, price float32, desc, userName string) (string, error){
+func AliPreOrder(orderId string, price float32, desc, userName string) (string, error) {
 	r := alipay.AliPayTradeAppPay{}
 	r.NotifyURL = AliCfg.NotifyUrl
 	r.ReturnURL = AliCfg.ReturnUrl
@@ -38,7 +38,7 @@ func AliPreOrder(orderId string, price float32, desc, userName string) (string, 
 	return aliPay.TradeAppPay(r)
 }
 
-func AliQuery(orderId string) (*alipay.AliPayTradeQueryResponse, error){
+func AliQuery(orderId string) (*alipay.AliPayTradeQueryResponse, error) {
 	r := alipay.AliPayTradeQuery{
 		AppAuthToken: string(AliCfg.PublicKey),
 		OutTradeNo:   orderId,
@@ -46,7 +46,7 @@ func AliQuery(orderId string) (*alipay.AliPayTradeQueryResponse, error){
 	return aliPay.TradeQuery(r)
 }
 
-func AliParseResult(req *http.Request) (IPayResp, error){
+func AliParseResult(req *http.Request) (IPayResp, error) {
 	r, err := aliPay.GetTradeNotification(req)
 
 	return (*AliPayResult)(r), err

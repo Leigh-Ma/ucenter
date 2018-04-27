@@ -45,7 +45,7 @@ func (c *userController) ModifyPassword() {
 	//expire token
 	c.RenderJson(resp.Success(&http.D{
 		"user_id": user.Id,
-		"email": user.Email,
+		"email":   user.Email,
 	}))
 }
 

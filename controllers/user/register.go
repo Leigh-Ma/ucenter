@@ -1,10 +1,10 @@
 package user
 
 import (
+	"ucenter/controllers"
 	"ucenter/controllers/form"
 	"ucenter/library/http"
 	"ucenter/models"
-	"ucenter/controllers"
 )
 
 type registerController struct {
@@ -46,6 +46,6 @@ func (c *registerController) Register() {
 
 func (c *registerController) Export() func(string) {
 	return controllers.Export(c, map[string]string{
-		"POST:  /":           "Register",
+		"POST:  /": "Register",
 	})
 }

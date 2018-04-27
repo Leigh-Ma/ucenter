@@ -8,10 +8,10 @@ type Item struct {
 	Amount   int
 }
 
-func NewItem(playerId int64, sn string) *Item{
+func NewItem(playerId int64, sn string) *Item {
 	return &Item{}
 }
 
-func (t *Item) TableName() string{
+func (t *Item) TableName() string {
 	return "items"
 }

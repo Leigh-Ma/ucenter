@@ -75,7 +75,7 @@ type qPvpAnswer struct {
 	Side      int   // server
 	IsCorrect bool  // server
 	AnswerAt  int64 // server
-	Hinted    bool  `json:"-"`// server
+	Hinted    bool  `json:"-"` // server
 }
 
 type qPvpHint struct {

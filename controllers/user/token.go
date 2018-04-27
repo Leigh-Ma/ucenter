@@ -1,10 +1,10 @@
 package user
 
 import (
+	"ucenter/controllers"
 	"ucenter/controllers/form"
 	"ucenter/library/http"
 	"ucenter/models"
-	"ucenter/controllers"
 )
 
 type tokenController struct {

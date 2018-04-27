@@ -1,10 +1,10 @@
 package api
 
-import(
-	"ucenter/library/http"
+import (
 	"ucenter/controllers"
-	"ucenter/models"
 	"ucenter/controllers/form"
+	"ucenter/library/http"
+	"ucenter/models"
 )
 
 type playerController struct {
