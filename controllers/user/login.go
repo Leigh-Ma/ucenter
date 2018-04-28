@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"ucenter/controllers"
 	"ucenter/controllers/proto"
 	"ucenter/library/http"
@@ -29,9 +30,9 @@ func (c *loginController) VisitorLogin() {
 
 	models.Upsert(auth)
 
-	resp.Success(&http.D{"Token": auth.Token, "UserId": user.Id})
-
-	c.RenderJson(resp)
+	c.RenderJson(resp.Success(&http.D{
+		"token": auth,
+	}))
 }
 
 // GET /login/token
@@ -41,23 +42,23 @@ func (c *loginController) TokenLogin() {
 		return
 	}
 
-	resp.Success(&http.D{
-		"Token":  f.Token,
-		"UserId": f.UserId,
-	})
-
-	player := models.GetPlayer(f.UserId)
+	player := models.GetPlayerByUserId(f.UserId)
 	if player.IsNew() {
-		resp.Error(http.ERR_USER_ID_INVALID)
-		c.RenderJson(resp)
+		c.RenderJson(resp.Error(http.ERR_USER_ID_INVALID))
 		return
 	}
 
 	auth := models.GetAuthToken(f.UserId)
 
-	resp.Status(auth.VerifyToken(f.Token))
+	if status := auth.VerifyToken(f.Token); http.OK != status {
+		resp.Error(status)
+		c.RenderJson(resp.Error(status))
+		return
+	}
 
-	c.RenderJson(resp)
+	c.RenderJson(resp.Success(&http.D{
+		"token": auth,
+	}))
 }
 
 // GET /login
@@ -86,15 +87,80 @@ func (c *loginController) Login() {
 
 	models.Upsert(auth)
 
-	resp.Success(&http.D{"Token": auth.Token, "UserId": user.Id})
+	c.RenderJson(resp.Success(&http.D{
+		"token": auth,
+	}))
+}
 
-	c.RenderJson(resp)
+func (c *loginController) WxCodeLogin() {
+	f, resp := &proto.FWxLogin{}, &http.JResp{}
+	if !c.CheckInputs(f, resp) {
+		return
+	}
+
+	user := models.GetUser(f.UserId)
+	if user.IsNew() {
+		user = models.GetUserByUuid(f.Uuid)
+	}
+
+	if user.IsNew() {
+		_, err := user.Insert(user)
+		if err != nil {
+			resp.Error(http.ERR_DATA_BASE_ERROR) //create new user error
+			c.RenderJson(resp)
+			return
+		}
+	}
+
+	ack, err := http.WxOAuthAuthorize(f.Code)
+	if err == nil {
+		if ack.Token.Failed() {
+			err = errors.New(ack.Token.ErrMsg)
+		} else if ack.User.Failed() {
+			err = errors.New(ack.User.ErrMsg)
+		}
+	}
+
+	if err != nil {
+		resp.Error(http.ERR_PARAMS_ERROR, err.Error()) //TODO
+		c.RenderJson(resp)
+		return
+	}
+
+	//just upsert all oauth information, do not care new/old user/oauth-user, whatever
+	oa := models.GetOAuthUserByOpenId(ack.User.OpenId, http.OAuthChannelWx)
+
+	oa.Channel = http.OAuthChannelWx
+	oa.UserId = user.GetId()
+
+	oa.OpenId = ack.User.OpenId
+	oa.IconUrl = ack.User.Icon
+	oa.Name = ack.User.Nickname
+	oa.Sex = ack.User.Sex
+
+	oa.AccessToken = ack.Token.Token
+	oa.RefreshToken = ack.Token.RefreshToken
+	oa.Expire = ack.Token.ExpireIn
+
+	models.Upsert(oa)
+
+	auth := models.GetAuthToken(user.GetId())
+
+	auth.SetNewToken(user.Id, oa.Expire)
+	auth.SetChannelToken(oa.AccessToken, oa.Channel)
+
+	models.Upsert(auth)
+
+	c.RenderJson(resp.Success(&http.D{
+		"token": auth,
+	}))
 }
 
 func (c *loginController) Export() func(string) {
 	return controllers.Export(c, map[string]string{
-		"GET:  /visitor": "VisitorLogin",
-		"GET:  /token":   "TokenLogin",
-		"GET:  /":        "Login",
+		"POST:  /visitor":    "VisitorLogin",
+		"POST:  /token":      "TokenLogin",
+		"POST:  /wx":         "WxCodeLogin",
+		"POST:  /":           "Login",
 	})
 }

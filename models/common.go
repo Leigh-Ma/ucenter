@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/astaxie/beego/orm"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -18,11 +19,11 @@ type ITable interface {
 }
 
 type TCom struct {
-	Id        int64     `orm:"auto"`
-	CreatedAt time.Time `orm:"auto_now_add;type(datetime)"`
-	UpdatedAt time.Time `orm:"auto_now;type(datetime)"`
-	isNew     bool      `orm:"-"`
-	dbh       *dbh      `orm:"-"`
+	Id        int64     `orm:"auto" json:"-"`
+	CreatedAt time.Time `orm:"auto_now_add;type(datetime)" json:"-"`
+	UpdatedAt time.Time `orm:"auto_now;type(datetime)" json:"-"`
+	isNew     bool      `orm:"-" json:"-"`
+	dbh       *dbh      `orm:"-" json:"-"`
 }
 
 func (t *TCom) IsNew() bool {
@@ -73,6 +74,9 @@ func (t *TCom) FindBy(field string, value interface{}, obj ITable) error {
 }
 
 func (t *TCom) FindById(id int64, obj ITable) error {
+	if id <= 0 {
+		return errors.New("Invalid object id for FindById")
+	}
 	if t.dbh == nil {
 		t.dbh = DBH()
 	}

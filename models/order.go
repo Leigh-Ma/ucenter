@@ -104,7 +104,7 @@ func (r *Order) dealNormalOrder(resp pay.IPayResp) {
 	}
 
 	r.Status = OrderStatusConfirm
-	player := GetPlayer(r.PlayerId)
+	player := GetPlayerByUserId(r.PlayerId)
 
 	if !player.IsNew() && player.Bought(r.Price, r.Product, r.Amount) {
 		r.Status = OrderStatusDone

@@ -29,7 +29,7 @@ func (c *authorizedController) currentUser() *models.User {
 
 func (c *authorizedController) currentPlayer() *models.Player {
 	if c.player == nil {
-		c.player = models.GetPlayer(c.User.GetId())
+		c.player = models.GetPlayerByUserId(c.User.GetId())
 		if c.player.IsNew() {
 			c.player.OnInit()
 			models.Upsert(c.player)
@@ -51,6 +51,7 @@ func (c *authorizedController) Prepare() {
 	resp := &http.JResp{}
 	status := uint(http.OK)
 
+	//do token login
 	id, err := strconv.ParseInt(c.Ctx.Input.Header(AuthUserId), 10, 64)
 	if err != nil || id <= 0 {
 		status = http.ERR_PLEASE_RE_LOGIN

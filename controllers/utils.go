@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"reflect"
 	"fmt"
 	"net/url"
+	"reflect"
 	"ucenter/library/tools"
 )
 
@@ -81,4 +81,3 @@ func ParseForm(form interface{}, values url.Values) {
 		}
 	}
 }
-

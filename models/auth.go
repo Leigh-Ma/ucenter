@@ -12,9 +12,10 @@ const (
 
 type AuthToken struct {
 	TCom
-	UserId   int64 `orm:"unique"`
-	Token    string
-	ExpireAt int64
+	UserId   int64  `orm:"unique" json:"user_id"`
+	Token    string `json:"token"`
+	ExpireAt int64  `json:"expire_at"`
+	AuthChan string `json:"auth_channel"`
 }
 
 func NewAuthToken(userId int64) *AuthToken {
@@ -25,6 +26,7 @@ func (t *AuthToken) TableName() string {
 	return "auth_tokens"
 }
 
+//todo channel dependent verify
 func (t *AuthToken) VerifyToken(token string) uint {
 	var err uint = http.OK
 
@@ -40,11 +42,17 @@ func (t *AuthToken) VerifyToken(token string) uint {
 }
 
 func (t *AuthToken) SetNewToken(userId int64, ttl int64) string {
-
 	t.Token = types.RandomString(32)
 	t.ExpireAt = time.Now().Unix() + ttl
 	t.UserId = userId
+	//token channel set to blank when given by server
 
+	return t.Token
+}
+
+func (t *AuthToken) SetChannelToken(token, channel string) string {
+	t.AuthChan = channel
+	t.Token = token
 	return t.Token
 }
 

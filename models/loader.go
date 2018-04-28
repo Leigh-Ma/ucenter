@@ -1,7 +1,13 @@
 package models
 
+//TODO pre-set value will be erased by find, SO, should reset when find return error
+
 func GetUser(userId int64) *User {
 	t := NewUser()
+	if userId == 0 {
+		t.isNew = true
+		return t
+	}
 	err := t.FindById(userId, t)
 	t.isNew = (err != nil)
 	return t
@@ -21,9 +27,30 @@ func GetUserByEmail(email string) *User {
 	return t
 }
 
-func GetPlayer(userId int64) *Player {
+func GetOAuthUserByUserId(userId int64, channel string) *OAuthUser {
+	t := NewOAuthUser(userId, channel)
+	err := t.NewQuery(t).Filter("user_id", userId).Filter("channel", channel).One(t)
+	t.isNew = (err != nil)
+	return t
+}
+
+func GetOAuthUserByOpenId(openId, channel string) *OAuthUser {
+	t := NewOAuthUser(0, channel)
+	err := t.NewQuery(t).Filter("open_id", openId).Filter("channel", channel).One(t)
+	t.isNew = (err != nil)
+	return t
+}
+
+func GetPlayerByUserId(userId int64) *Player {
 	t := NewPlayer(userId, "")
 	err := t.FindBy("user_id", userId, t)
+	t.isNew = (err != nil)
+	return t
+}
+
+func GetPlayer(playerId int64) *Player {
+	t := NewPlayer(0, "")
+	err := t.FindById(playerId, t)
 	t.isNew = (err != nil)
 	return t
 }
