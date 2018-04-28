@@ -9,84 +9,84 @@ func GetUser(userId int64) *User {
 		return t
 	}
 	err := t.FindById(userId, t)
-	t.isNew = (err != nil)
+	t.Id, t.isNew = userId, (err != nil)
 	return t
 }
 
 func GetUserByUuid(uuid string) *User {
 	t := NewUser()
 	err := t.FindBy("uuid", uuid, t)
-	t.isNew = (err != nil)
+	t.Uuid, t.isNew = uuid, (err != nil)
 	return t
 }
 
 func GetUserByEmail(email string) *User {
 	t := NewUser()
 	err := t.FindBy("email", email, t)
-	t.isNew = (err != nil)
+	t.Email, t.isNew = email, (err != nil)
 	return t
 }
 
 func GetOAuthUserByUserId(userId int64, channel string) *OAuthUser {
 	t := NewOAuthUser(userId, channel)
 	err := t.NewQuery(t).Filter("user_id", userId).Filter("channel", channel).One(t)
-	t.isNew = (err != nil)
+	t.UserId, t.Channel, t.isNew = userId, channel, (err != nil)
 	return t
 }
 
 func GetOAuthUserByOpenId(openId, channel string) *OAuthUser {
 	t := NewOAuthUser(0, channel)
 	err := t.NewQuery(t).Filter("open_id", openId).Filter("channel", channel).One(t)
-	t.isNew = (err != nil)
+	t.OpenId, t.Channel, t.isNew = openId, channel, (err != nil)
 	return t
 }
 
 func GetPlayerByUserId(userId int64) *Player {
 	t := NewPlayer(userId, "")
 	err := t.FindBy("user_id", userId, t)
-	t.isNew = (err != nil)
+	t.UserId, t.isNew = userId, (err != nil)
 	return t
 }
 
 func GetPlayer(playerId int64) *Player {
 	t := NewPlayer(0, "")
 	err := t.FindById(playerId, t)
-	t.isNew = (err != nil)
+	t.Id, t.isNew = playerId, (err != nil)
 	return t
 }
 
 func GetPlayerSign(playerId int64) *PlayerSign {
 	t := NewPlayerSign(playerId)
 	err := t.FindBy("player_id", playerId, t)
-	t.isNew = (err != nil)
+	t.PlayerId, t.isNew = playerId, (err != nil)
 	return t
 }
 
 func GetAuthToken(userId int64) *AuthToken {
 	t := NewAuthToken(userId)
 	err := t.FindBy("user_id", userId, t)
-	t.isNew = (err != nil)
+	t.UserId, t.isNew = userId, (err != nil)
 	return t
 }
 
 func GetItem(playerId int64, itemSn string) *Item {
 	t := NewItem(playerId, itemSn)
 	err := t.NewQuery(t).Filter("player_id", playerId).Filter("name", itemSn).One(t)
-	t.isNew = (err != nil)
+	t.PlayerId, t.Name, t.isNew = playerId, itemSn, (err != nil)
 	return t
 }
 
 func GetOrder(orderSn string) *Order {
 	t := &Order{}
 	err := t.FindBy("order_id", orderSn, t)
-	t.isNew = (err != nil)
+	t.OrderId, t.isNew = orderSn, (err != nil)
 	return t
 }
 
 func GetAnswerLog(playerId, questionId int64) *AnswerLog {
 	t := NewAnswerLog(playerId, questionId)
 	err := t.NewQuery(t).Filter("player_id", playerId).Filter("question_id", questionId).One(t)
-	t.isNew = (err != nil)
+	t.PlayerId, t.QuestionId, t.isNew = playerId, questionId, (err != nil)
 	return t
 }
 

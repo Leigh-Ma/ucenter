@@ -20,6 +20,7 @@ const (
 	ERR_TOKEN_EXPIRED        = 1003
 	ERR_TOKEN_INVALID        = 1004
 	ERR_USER_ID_INVALID      = 1005
+	ERR_WX_AUTH_BY_CODE_ERR  = 1050
 	//## User action
 	ERR_PASSWORD_NOT_CHANGED = 1101
 	//## Register
@@ -55,6 +56,7 @@ var ErrDesc = map[uint]string{
 	ERR_TOKEN_EXPIRED:        "Token expired",
 	ERR_TOKEN_INVALID:        "Token invalid",
 	ERR_USER_ID_INVALID:      "User not found by user id given",
+	ERR_WX_AUTH_BY_CODE_ERR:  "Use WeChat code auth error",
 	//## User action
 	ERR_PASSWORD_NOT_CHANGED: "Password is not changed",
 	//## Register

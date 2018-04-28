@@ -92,21 +92,26 @@ func (c *loginController) Login() {
 	}))
 }
 
+//for old user, must use uuid and old user id as a verify for user
 func (c *loginController) WxCodeLogin() {
 	f, resp := &proto.FWxLogin{}, &http.JResp{}
 	if !c.CheckInputs(f, resp) {
 		return
 	}
 
-	user := models.GetUser(f.UserId)
-	if user.IsNew() {
-		user = models.GetUserByUuid(f.Uuid)
-	}
+	user := models.GetUserByUuid(f.Uuid)
 
 	if user.IsNew() {
 		_, err := user.Insert(user)
 		if err != nil {
-			resp.Error(http.ERR_DATA_BASE_ERROR) //create new user error
+			resp.Error(http.ERR_DATA_BASE_ERROR, err.Error()) //create new user error
+			c.RenderJson(resp)
+			return
+		}
+	} else {
+		//for old user, must verify uuid and user id
+		if f.UserId != user.GetId() {
+			resp.Error(http.ERR_USER_ID_INVALID) //create new user error
 			c.RenderJson(resp)
 			return
 		}
@@ -122,7 +127,7 @@ func (c *loginController) WxCodeLogin() {
 	}
 
 	if err != nil {
-		resp.Error(http.ERR_PARAMS_ERROR, err.Error()) //TODO
+		resp.Error(http.ERR_WX_AUTH_BY_CODE_ERR, err.Error())
 		c.RenderJson(resp)
 		return
 	}

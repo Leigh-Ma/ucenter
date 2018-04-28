@@ -21,6 +21,7 @@ func initOrm() {
 	orm.RegisterDataBase("default", "mysql", "root:123456@tcp(127.0.0.1:3306)/UCENTER?charset=utf8&loc=UTC")
 
 	orm.RunCommand()
+	orm.Debug = true
 	orm.DebugLog = orm.NewLog(os.Stdout)
 
 	orm.RunSyncdb("default", false, false)

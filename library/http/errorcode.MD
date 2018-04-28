@@ -20,6 +20,8 @@
 1004-TOKEN_INVALID-Token invalid
 1005-USER_ID_INVALID-User not found by user id given
 
+1050-WX_AUTH_BY_CODE_ERR-Use WeChat code auth error
+
 ### User action
 1101-PASSWORD_NOT_CHANGED-Password is not changed
 

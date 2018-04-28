@@ -44,7 +44,7 @@ type FPasswordLogin struct {
 
 /* a visitor login with uuid and app key, (ucenter)*/
 type FVisitorLogin struct {
-	Uuid   string `json:"uuid"`
+	Uuid   string `valid:"Required" json:"uuid"`
 	AppKey string `json:"app_key"`
 }
 
@@ -71,7 +71,7 @@ type FBuyProduct struct {
 }
 
 type FWxLogin struct {
-	Code   string `json:"code" valid:"Require"`
-	Uuid   string `json:"uuid"`
-	UserId int64  `json:"user_id"`
+	Code   string `valid:"Required" json:"code"`
+	Uuid   string `valid:"Required" json:"uuid"`
+	UserId int64  `json:"user_id"` //optional for new user
 }

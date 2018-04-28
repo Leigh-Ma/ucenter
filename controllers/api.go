@@ -1,15 +1,15 @@
 package controllers
 
 import (
-	"encoding/json"
+
 	"errors"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
 	"github.com/gorilla/websocket"
 	nh "net/http"
-	"strings"
 	"ucenter/library/http"
 	"ucenter/library/tools"
+	"encoding/json"
 )
 
 var _upg = websocket.Upgrader{}
@@ -55,32 +55,34 @@ func (c *ApiController) Prepare() {
 
 func (c *ApiController) isJsonReq() bool {
 	return (c.Ctx.Input.Header("X-Requested-With") == "XMLHttpRequest") ||
-		(c.Ctx.Input.Header("Accept") == "application/json")
+		(c.Ctx.Input.Header("Content-Type") == "application/json")
 }
 
 func (c *ApiController) parseJsonInput(form interface{}) error {
 	var err error = nil
-
-	if strings.Compare(strings.ToUpper(c.Ctx.Request.Method), "GET") == 0 {
-		ParseForm(form, c.Input())
-	} else {
+	if c.Ctx.Request.Method == "POST" {
 		err = json.Unmarshal(c.Ctx.Input.RequestBody, form)
 	}
 
 	if err != nil {
-		beego.Info("JSON request parse err: ", err, c.Ctx.Input.RequestBody, string(c.Ctx.Input.RequestBody))
+		//err = c.Ctx.Request.ParseForm()
+		ParseForm(form, c.Input())
+	}
+
+	if err != nil {
+		beego.Error("Input ", c.Input(), " Parsed error: ", err.Error())
 		return err
 	}
 
-	beego.Info(c.Input(), ": Frased Form Data: ", tools.Stringify(form))
+	beego.Info("Input ", c.Input(), " Parsed As: ", tools.Stringify(form))
 
 	valid := validation.Validation{}
 	if ok, _ := valid.Valid(form); !ok {
 		errs := valid.ErrorMap()
-		for _, e := range errs {
-			return errors.New(e.Error())
+		for k, e := range errs {
+			return errors.New(k + ": " + e.Error())
 		}
 	}
 
-	return err
+	return nil
 }
