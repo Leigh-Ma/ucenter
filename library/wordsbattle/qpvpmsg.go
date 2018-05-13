@@ -38,14 +38,21 @@ func (t *qPvp) onMsgAnswerRound(player *qPvpPlayer, msg *QPvpMsg) {
 	//wait until other player(s) to finish or broadcast to others ?
 	answer := t.handlePlayerAnswer(player, msg)
 	// NO MORE CHANGE ON msg, please
-	if t.IsPvp {
-		if t.isAllPlayerAnswered(msg) {
-			t.sendCmd(&qPvpCmd{Code: pvpCmdNextRound})
-		}
-	} else {
+	if t.IsPractice {
 		if answer.IsCorrect {
 			t.sendCmd(&qPvpCmd{Code: pvpCmdNextRound})
 		}
+		return
+	}
+
+	if t.isAllPlayerAnswered(msg) {
+		t.sendCmd(&qPvpCmd{Code: pvpCmdNextRound})
+		return
+	}
+
+	//race mode, if no robot, give no opportunity for the others after one right answer
+	if !t.isNormalMode() && answer.IsCorrect && !t.HasRobot {
+		t.sendCmd(&qPvpCmd{Code: pvpCmdNextRound})
 	}
 }
 
@@ -59,11 +66,11 @@ func (t *qPvp) onMsgAnswerSkip(player *qPvpPlayer, msg *QPvpMsg) {
 	//wait until other player(s) to finish or broadcast to others ?
 	t.handlePlayerSkipRound(player, msg)
 	// NO MORE CHANGE ON msg, please
-	if t.IsPvp {
+	if t.IsPractice {
+		t.sendCmd(&qPvpCmd{Code: pvpCmdNextRound})
+	} else {
 		if t.isAllPlayerAnswered(msg) {
 			t.sendCmd(&qPvpCmd{Code: pvpCmdNextRound})
 		}
-	} else {
-		t.sendCmd(&qPvpCmd{Code: pvpCmdNextRound})
 	}
 }

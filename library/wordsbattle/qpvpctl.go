@@ -11,6 +11,11 @@ const (
 	ctrlStatusTinyError = 1
 	ctrlStatusCritical  = 2
 	ctrlStatusFinished  = 3
+
+	stateCreated  = 0
+	stateWaiting  = 1
+	stateStarted  = 2
+	stateFinished = 3
 )
 
 type qPvpCmd struct {
@@ -200,6 +205,7 @@ func (t *qPvp) genEscapeMsg(d interface{}) *QPvpMsg {
 		t.errorEnd(errors.New("pvp on cmd escape: " + err.Error()))
 		return nil
 	}
+	t.HasRobot = true
 
 	return &QPvpMsg{Code: pvpNotifyPlayerEscape, TimeStamp: time.Now().Unix(), Side: ep.Side}
 }

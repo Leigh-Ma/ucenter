@@ -3,19 +3,16 @@ package wb
 import (
 	"github.com/gorilla/websocket"
 	"time"
+	"ucenter/controllers/proto"
 )
 
 func (t *qPvp) started() {
-	qPvpWaiting.delQPvp(t)
-	if t.IsPvp {
-		qPvpON.addQPvp(t)
-	}
-
+	_startPvp(t)
 }
 
 func (t *qPvp) finished() {
 	time.Sleep(2 * time.Second)
-	qPvpON.delQPvp(t)
+	_finishPvp(t)
 	t.status = ctrlStatusFinished
 	for _, player := range t.players {
 		if player.WS != nil {
@@ -29,6 +26,9 @@ func (t *qPvp) finished() {
 }
 
 func (t *qPvp) moreRound() bool {
+	if !t.IsPractice && t.living() <= 1 {
+		return false
+	}
 	return t.curRound < t.RoundNum
 }
 
@@ -119,4 +119,18 @@ func (t *qPvp) getHintForPlayer(player *qPvpPlayer) string {
 	a := player.prepareRoundAnswer(t.curRound)
 	a.Hinted = true
 	return t.curQuestion.Hint
+}
+
+func (t *qPvp) isNormalMode() bool {
+	return t.C.Mode == proto.Wb_pvp_mode_normal
+}
+
+func (t *qPvp) living() int {
+	c := 0
+	for _, p := range t.players {
+		if p.HP > 0.01 {
+			c += 1
+		}
+	}
+	return c
 }

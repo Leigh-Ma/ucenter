@@ -45,7 +45,7 @@ func (t *qPvp) doPvpLog() {
 	}
 
 	qList := t.asJson(qs)
-	isPvp := t.IsPvp && len(t.players) >= 2
+	isPvp := !t.IsPractice && len(t.players) >= 2
 
 	for _, p := range t.players {
 		if p.IsRobot {
@@ -60,7 +60,7 @@ func (t *qPvp) doPvpLog() {
 		l.Round = t.RoundNum
 		l.EscapeAt = p.EscapedRound
 		l.Right = p.Right
-		l.EarnCoin = int(p.GoldCoin) //TODO
+		l.EarnCoin = int(t.C.Coin) //TODO
 		l.IsPvp = isPvp
 		l.Questions = qList
 		l.Brief = t.briefString()

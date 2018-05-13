@@ -2,10 +2,10 @@ package proto
 
 type WB_Msg struct {
 	Code       int         `json:"code"`
-	codeString string      `json:"-"`
 	TimeStamp  int64       `json:"time_stamp"`
 	PlayerId   int64       `json:"player_id"` /* 0 for server message send to client */
 	Data       interface{} `json:"data"`
+	codeString string      `json:"-"`
 	payload    []byte      `json:"-"` /* marshaled data for this.Data, cache when broadcast */
 }
 
@@ -26,9 +26,10 @@ type Wb_Player struct {
 
 //no recording for server, server always save detail log
 type WB_PvpCreateReq struct {
-	Mode       string `json:"mode"`
-	Subject    string `json:"subject"`
-	Difficulty string `json:"difficulty"`
+	Mode          string `json:"mode"`
+	Subject       string `json:"subject"`
+	Difficulty    string `json:"difficulty"`
+	SpawnDuration int64  `json:"spawn_duration"`
 }
 
 //find a pvp room(pvp waiting for another player to start) to join
@@ -36,6 +37,11 @@ type WB_PvpJoinReq struct {
 	Mode       string `json:"mode"`
 	Subject    string `json:"subject"`
 	Difficulty string `json:"difficulty"`
+}
+
+//join a pvp room by shared pvp link
+type WB_PvpInvitedJoinReq struct {
+	Guid string `json:"room_id"`
 }
 
 //find a pvp room(pvp waiting for another player to start) to join

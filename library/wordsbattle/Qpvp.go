@@ -7,22 +7,37 @@ import (
 )
 
 type qPvp struct {
-	Guid           types.IdString
-	Level          int
-	Subject        string
+	Guid  types.IdString
+	Level int
+
+	C struct {
+		Mode          string
+		Subject       string /*question subject*/
+		Difficulty    string
+		SpawnDuration int64
+		Stamina       int
+		Coin          int
+
+		RewardRatio  float32
+		manualCreate bool
+	}
+
 	CreateAt       int64
 	StartThreshold int //player num when player started
 	RoundNum       int
-	IsPvp          bool
-	ticker         int //heart beat times
-	allOffLine     bool
-	curRound       int
-	questions      map[int]*qPvpQuestion
-	players        map[int]*qPvpPlayer
+	IsPractice     bool
+	HasRobot       bool
+
+	ticker     int //heart beat times
+	allOffLine bool
+	curRound   int
+	questions  map[int]*qPvpQuestion
+	players    map[int]*qPvpPlayer
 
 	curQuestion *qPvpQuestion `json:"-"`
 	err         error         `json:"-"`
 	status      int           `json:"-"`
+	state       int           `jsob:"_"`
 	cmd         chan *qPvpCmd `json:"-"`
 	msg         chan *QPvpMsg `json:"-"`
 }
@@ -33,11 +48,12 @@ func newQPvp(startThreshold, level, round int) *qPvp {
 		Level:          level,
 		StartThreshold: startThreshold,
 		RoundNum:       round,
-		IsPvp:          true,
+		IsPractice:     false,
 		CreateAt:       time.Now().Unix(),
 		msg:            make(chan *QPvpMsg, 5),
 		cmd:            make(chan *qPvpCmd, 1),
 		players:        make(map[int]*qPvpPlayer, 2),
+		state:          stateCreated,
 	}
 
 	q.startCtrlRoutine()
@@ -59,6 +75,7 @@ func (t *qPvp) Join(p *qPvpPlayer, vsRobot ...bool) error {
 
 	if p.IsRobot {
 		//start a robot process routine
+		t.HasRobot = true
 		return p.workAsRobot()
 	} else {
 		//work as real player, just a loop in current routine
@@ -126,6 +143,6 @@ func (t *qPvp) chkRoundTimeOut(now int64) bool {
 }
 
 func (t *qPvp) joinARobot(mapper *qPvpPlayer) error {
-	robot := NewQPvpRobot(mapper.mp, mapper.GoldCoin, mapper.Stamina)
+	robot := NewQPvpRobot(mapper.mp)
 	return t.Join(robot)
 }

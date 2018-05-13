@@ -6,7 +6,7 @@ import (
 )
 
 func (t *qPvp) _typ() string {
-	if t.IsPvp {
+	if !t.IsPractice {
 		return "PVP"
 	} else {
 		return "EXE"

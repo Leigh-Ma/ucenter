@@ -163,9 +163,9 @@ func (c *loginController) WxCodeLogin() {
 
 func (c *loginController) Export() func(string) {
 	return controllers.Export(c, map[string]string{
-		"POST:  /visitor":    "VisitorLogin",
-		"POST:  /token":      "TokenLogin",
-		"POST:  /wx":         "WxCodeLogin",
-		"POST:  /":           "Login",
+		"POST:  /visitor": "VisitorLogin",
+		"POST:  /token":   "TokenLogin",
+		"POST:  /wx":      "WxCodeLogin",
+		"POST:  /":        "Login",
 	})
 }

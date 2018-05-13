@@ -1,7 +1,7 @@
 package controllers
 
 import (
-
+	"encoding/json"
 	"errors"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
@@ -9,7 +9,6 @@ import (
 	nh "net/http"
 	"ucenter/library/http"
 	"ucenter/library/tools"
-	"encoding/json"
 )
 
 var _upg = websocket.Upgrader{}

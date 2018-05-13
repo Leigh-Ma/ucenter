@@ -17,10 +17,10 @@ type qPvpWs interface {
 }
 
 type qPvpPlayer struct {
-	Side     int
-	Stakes   int32 // 赌注筹码
-	GoldCoin int32
-	Stamina  int32
+	Side   int
+	Stakes int32 // 赌注筹码
+	HP     float32
+	Combo  int
 
 	IsRobot      bool
 	Escaped      bool
@@ -40,22 +40,20 @@ type qPvpPlayer struct {
 	mp        *models.Player
 }
 
-func NewQPvpPlayer(player *models.Player, coin, stamina int32, ws qPvpWs) *qPvpPlayer {
+func NewQPvpPlayer(player *models.Player, ws qPvpWs) *qPvpPlayer {
 	return &qPvpPlayer{
-		mp:       player,
-		GoldCoin: coin,
-		Stamina:  stamina,
-		Answers:  make(map[int]*qPvpAnswer, 0),
-		WS:       ws,
+		mp:      player,
+		HP:      100.0,
+		Answers: make(map[int]*qPvpAnswer, 0),
+		WS:      ws,
 	}
 }
 
 //create robot according to player
-func NewQPvpRobot(player *models.Player, coin, stamina int32) *qPvpPlayer {
+func NewQPvpRobot(player *models.Player) *qPvpPlayer {
 	return &qPvpPlayer{
 		IsRobot:   true,
-		GoldCoin:  coin,
-		Stamina:   stamina,
+		HP:        100.0,
 		Answers:   make(map[int]*qPvpAnswer, 0),
 		WS:        nil,
 		mp:        player,

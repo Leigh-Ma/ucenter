@@ -6,7 +6,7 @@ import (
 
 type User struct {
 	TCom
-	Uuid     string `orm:"unique;size(64)"`
+	Uuid string `orm:"unique;size(64)"`
 
 	Email    string //will be ensure to be unique by application, for vistors
 	Password string

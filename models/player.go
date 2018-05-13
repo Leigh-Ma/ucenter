@@ -41,7 +41,8 @@ func NewPlayer(accountId int64, name string) *Player {
 func (t *Player) OnInit() {
 	t.GoldCoin = 100
 	t.Stamina = 99
-	t.Rank = 1
+	t.Rank = 0
+	t.SubRank = 1
 }
 
 func (t *Player) TableName() string {
@@ -51,6 +52,10 @@ func (t *Player) TableName() string {
 func (t *Player) QueryCond() *orm.Condition {
 	c := orm.NewCondition()
 	return c.And("player_id", t.GetId())
+}
+
+func (t *Player) PvpLevel() int {
+	return t.Rank*oneSubRankStep + t.SubRank
 }
 
 func (t *Player) OnPvpWin() {
