@@ -9,9 +9,11 @@ const (
 	pvpCmdNextRound = 4
 	pvpCmdFinish    = 5
 	pvpCmdErrEnd    = 6
+	pvpCmdCancel    = 7
 
 	pvpNotifyError = 10
 
+	pvpMsgCancel      = 100
 	pvpMsgAnswerRound = 101
 	pvpMsgAnswerHint  = 102
 	pvpMsgAnswerSkip  = 103
@@ -24,6 +26,7 @@ const (
 	pvpNotifyPlayerJoin   = 1005
 	pvpNotifyPlayerEscape = 1006
 	pvpNotifyPvpEnd       = 1007
+	pvpNotifyCanceled     = 1008
 )
 
 var codeName map[int]string = map[int]string{
@@ -35,12 +38,14 @@ var codeName map[int]string = map[int]string{
 	pvpCmdNextRound: "pvpCmdNextRound",
 	pvpCmdFinish:    "pvpCmdFinish",
 	pvpCmdErrEnd:    "pvpCmdErrEnd",
+	pvpCmdCancel:    "pvpCmdCancel",
 
 	pvpNotifyError: "pvpNotifyError",
 
 	pvpMsgAnswerRound: "pvpMsgAnswerRound",
 	pvpMsgAnswerHint:  "pvpMsgAnswerHint",
 	pvpMsgAnswerSkip:  "pvpMsgAnswerSkip",
+	pvpMsgCancel:      "pvpMsgCancel",
 
 	pvpNotifyPvpStart:     "pvpNotifyPvpStart",
 	pvpNotifyRoundCreate:  "pvpNotifyRoundCreate",
@@ -50,6 +55,7 @@ var codeName map[int]string = map[int]string{
 	pvpNotifyPlayerJoin:   "pvpNotifyPlayerJoin",
 	pvpNotifyPlayerEscape: "pvpNotifyPlayerEscape",
 	pvpNotifyPvpEnd:       "pvpNotifyPvpEnd",
+	pvpNotifyCanceled:     "pvpNotifyCanceled",
 }
 
 const (
@@ -107,4 +113,8 @@ type qPvpNotifyStart struct {
 
 type qPvpNotifyJoin struct {
 	Player *qPvpPlayerBrief
+}
+
+type qPvpNotifyCancel struct {
+	Side int
 }

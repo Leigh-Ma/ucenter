@@ -5,6 +5,19 @@ import (
 	"errors"
 )
 
+
+func (t *qPvp) handlePlayerCancel(player *qPvpPlayer, msg *QPvpMsg) bool {
+	//do not check which player send this cmd
+	if !t.IsPractice && t.state >= stateWaiting{
+		ack, _ := player.prepareMsg(pvpNotifyCanceled, &qPvpNotifyCancel{Side: player.Side})
+		t.broadCastMsg(ack)
+		return true
+	}
+
+	return false
+}
+
+
 func (t *qPvp) handlePlayerAnswer(player *qPvpPlayer, msg *QPvpMsg) *qPvpAnswer {
 	answer := player.prepareRoundAnswer(t.curRound)
 

@@ -23,6 +23,8 @@ func (t *qPvp) HandleMsg(msg *QPvpMsg) {
 	}
 
 	switch msg.Code {
+	case pvpMsgCancel:
+		t.onMsgCancel(player, msg)
 	case pvpMsgAnswerRound:
 		t.onMsgAnswerRound(player, msg)
 	case pvpMsgAnswerHint:
@@ -32,6 +34,16 @@ func (t *qPvp) HandleMsg(msg *QPvpMsg) {
 	default:
 		t.Error("%s should not be proccessed", msg.codeName())
 	}
+}
+
+func (t *qPvp) onMsgCancel(player *qPvpPlayer, msg *QPvpMsg) {
+	//wait until other player(s) to finish or broadcast to others ?
+	canceled := t.handlePlayerCancel(player, msg)
+	if canceled {
+		t.sendCmd(&qPvpCmd{Code: pvpCmdFinish})
+		return
+	}
+	// NO MORE CHANGE ON msg, please
 }
 
 func (t *qPvp) onMsgAnswerRound(player *qPvpPlayer, msg *QPvpMsg) {

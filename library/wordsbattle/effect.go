@@ -7,8 +7,12 @@ func (t *qPvp) takeAnswerEffect(p *qPvpPlayer, a *qPvpAnswer) {
 
 	if !a.IsCorrect {
 		t._checkAllFailed()
+		return
 	}
 
+	//My answer is right
+	a.Combo = p.Combo
+	a.Damage = 0.0
 	if t.isNormalMode() {
 		t._normalModeEffect(p, a)
 	} else {
@@ -17,7 +21,6 @@ func (t *qPvp) takeAnswerEffect(p *qPvpPlayer, a *qPvpAnswer) {
 }
 
 func (t *qPvp) _normalModeEffect(p *qPvpPlayer, a *qPvpAnswer) {
-
 	//My answer is right
 	damage, ratio := float32(1.0), float32(1.0)
 	if p.Combo > 2 {
@@ -33,8 +36,7 @@ func (t *qPvp) _normalModeEffect(p *qPvpPlayer, a *qPvpAnswer) {
 		if answer, ok := player.Answers[t.curRound]; ok {
 			// He has answered before me!
 			if answer.IsCorrect {
-				//His answers is also right ToT
-				//robot always answer after user
+				//His answers is also right ToT, robot always answer after user
 				damage *= 0.8
 			} else {
 				//His answers is wrong =_=
@@ -46,7 +48,9 @@ func (t *qPvp) _normalModeEffect(p *qPvpPlayer, a *qPvpAnswer) {
 		}
 
 		damage = damage * ratio
+
 		player.HP -= damage
+		a.Damage += damage //what's the meaning for multiple player?
 	}
 }
 
@@ -83,6 +87,8 @@ func (t *qPvp) _raceModeEffect(p *qPvpPlayer, a *qPvpAnswer) {
 
 		damage = damage * ratio
 		player.HP -= damage
+
+		a.Damage += damage
 	}
 }
 

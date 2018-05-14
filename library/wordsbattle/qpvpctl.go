@@ -16,6 +16,7 @@ const (
 	stateWaiting  = 1
 	stateStarted  = 2
 	stateFinished = 3
+	stateCanceled = 4
 )
 
 type qPvpCmd struct {
@@ -211,6 +212,7 @@ func (t *qPvp) genEscapeMsg(d interface{}) *QPvpMsg {
 }
 
 func (t *qPvp) genFinishMsg() *QPvpMsg {
+	//TODO SEND RESULTS?
 	return &QPvpMsg{
 		Code:      pvpNotifyPvpEnd,
 		Side:      pvpSideServer,
