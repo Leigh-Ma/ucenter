@@ -124,7 +124,3 @@ func (t *Player) recover() {
 		}
 	}
 }
-
-func (p *Player) Bought(price float32, product string, amount int) bool {
-	return false
-}

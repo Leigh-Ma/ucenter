@@ -69,16 +69,17 @@ func (r *Order) AliNotify(aliNotify pay.IPayResp) {
 	r.thirdPartyNotify(aliNotify, OrderChannelAliPay)
 }
 
-func (r *Order) thirdPartyNotify(wxResp pay.IPayResp, ch string) {
+func (r *Order) thirdPartyNotify(payResp pay.IPayResp, ch string) {
 	if r.IsNew() {
-		r.dealNewOrder(wxResp, ch)
+		r.dealNewOrder(payResp, ch)
 		return
 	}
 
 	switch r.Status {
 	case OrderStatusCreate:
+		r.dealNormalOrder(payResp)
 	case OrderStatusConfirm:
-		r.dealNormalOrder(wxResp)
+		r.dealNormalOrder(payResp)
 	}
 }
 
@@ -106,9 +107,17 @@ func (r *Order) dealNormalOrder(resp pay.IPayResp) {
 	r.Status = OrderStatusConfirm
 	player := GetPlayerByUserId(r.PlayerId)
 
-	if !player.IsNew() && player.Bought(r.Price, r.Product, r.Amount) {
+	if r.TakeEffect(player) {
 		r.Status = OrderStatusDone
 	}
 
 	Upsert(player)
+}
+
+func (r *Order) TakeEffect(player *Player) bool {
+	if r.Status != OrderStatusConfirm {
+		return false
+	}
+	// TODO
+	return true
 }

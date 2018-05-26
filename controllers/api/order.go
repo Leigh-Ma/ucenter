@@ -21,6 +21,7 @@ func (c *orderController) AliPay() {
 
 	player := c.currentPlayer()
 	order := models.NewOrder(player.GetId(), f.Amount, f.ProductId, float32(f.Amount)*f.Price)
+	order.SetChannel(models.OrderChannelAliPay)
 	_, err := order.Insert(order)
 	if err != nil {
 		c.renderJson(resp.Error(http.ERR_ORDER_PRE_CREATE_ERR, err.Error()))
@@ -47,6 +48,7 @@ func (c *orderController) WxPay() {
 
 	player := c.currentPlayer()
 	order := models.NewOrder(player.GetId(), f.Amount, f.ProductId, float32(f.Amount)*f.Price)
+	order.SetChannel(models.OrderChannelWxPay)
 	_, err := order.Insert(order)
 	if err != nil {
 		c.renderJson(resp.Error(http.ERR_ORDER_PRE_CREATE_ERR, err.Error()))

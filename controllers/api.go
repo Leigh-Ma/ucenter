@@ -79,7 +79,7 @@ func (c *ApiController) parseJsonInput(form interface{}) error {
 	if ok, _ := valid.Valid(form); !ok {
 		errs := valid.ErrorMap()
 		for k, e := range errs {
-			return errors.New(k + ": " + e.Error())
+			return errors.New(k + ": " + e[0].Error())
 		}
 	}
 

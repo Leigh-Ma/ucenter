@@ -10,8 +10,8 @@ import (
 type aliCfg struct {
 	AppId        string
 	PartnerId    string
-	PublicKey    []byte
-	PrivateKey   []byte
+	PublicKey    string
+	PrivateKey   string
 	IsProduction bool
 	ReturnUrl    string
 	NotifyUrl    string
