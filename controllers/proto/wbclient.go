@@ -24,7 +24,6 @@ type Wb_Player struct {
 	IsRobot  bool   `json:"is_robot"`
 }
 
-
 //find a pvp room(pvp waiting for another player to start) to join
 type WB_PvpQuitReq struct {
 }

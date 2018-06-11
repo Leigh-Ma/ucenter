@@ -9,7 +9,11 @@ import (
 )
 
 type battleController struct {
-	authorizedController
+	controllers.ApiController
+}
+
+func (c *battleController) renderJson(resp *http.JResp) {
+	c.RenderJson(resp)
 }
 
 func (c *battleController) Practice() {

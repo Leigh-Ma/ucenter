@@ -41,11 +41,10 @@ type FWxLogin struct {
 }
 
 /* @/api/authed/sign/daily */
-type fDailySign struct {}
+type fDailySign struct{}
 
 /* @/api/authed/sign/hour */
-type fHourSign struct {}
-
+type fHourSign struct{}
 
 /* no recording for server, server always save detail log */
 /* @/api/authed/battle/create*/
