@@ -16,6 +16,9 @@ func (c *battleController) renderJson(resp *http.JResp) {
 	c.RenderJson(resp)
 }
 
+func (c *battleController) Prepare() {
+}
+
 func (c *battleController) Practice() {
 	resp := &http.JResp{}
 	ws, err := c.WebSocket()

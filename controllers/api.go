@@ -53,6 +53,7 @@ func (c *ApiController) Prepare() {
 }
 
 func (c *ApiController) isJsonReq() bool {
+	beego.Info(c.Ctx.Request.Header)
 	return (c.Ctx.Input.Header("X-Requested-With") == "XMLHttpRequest") ||
 		(c.Ctx.Input.Header("Content-Type") == "application/json")
 }
@@ -65,7 +66,7 @@ func (c *ApiController) parseJsonInput(form interface{}) error {
 
 	if err != nil {
 		//err = c.Ctx.Request.ParseForm()
-		ParseForm(form, c.Input())
+		err = c.ParseForm(form)
 	}
 
 	if err != nil {
