@@ -43,7 +43,7 @@ func (c *authorizedController) renderJson(resp *http.JResp) {
 	c.RenderJson(resp)
 }
 
-func (c *authorizedController) Prepare() {
+func (c *authorizedController) xPrepare() {
 	//check url prefix?
 	c.player = nil
 	c.authed = false
